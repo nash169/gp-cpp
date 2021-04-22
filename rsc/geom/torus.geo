@@ -1,6 +1,6 @@
 // Parameters
-lc = DefineNumber[ 0.1, Name "Parameters/lc" ];
-rad_ext = DefineNumber[ 5, Name "Parameters/rad_ext" ];
+lc = DefineNumber[ 0.3, Name "Parameters/lc" ];
+rad_ext = DefineNumber[ 2, Name "Parameters/rad_ext" ];
 rad_in = DefineNumber[ 1, Name "Parameters/rad_in" ];
 
 // Set the geometry order (1, 2, ..., 9)
@@ -98,6 +98,14 @@ Curve Loop(11) = {18, 7, 31, 12};
 Surface(11) = {11};
 Curve Loop(12) = {31, -11, -21, -8};
 Surface(12) = {12};
+Curve Loop(13) = {14, -19, 7, -30};
+Surface(13) = {13};
+Curve Loop(14) = {30, 8, -24, 13};
+Surface(14) = {14};
+Curve Loop(15) = {24, -5, -27, 16};
+Surface(15) = {15};
+Curve Loop(16) = {15, 27, 6, 19};
+Surface(16) = {16};
 
 // Quadrilaterals mesh
 If (type == 4)
@@ -113,6 +121,10 @@ If (type == 4)
     Recombine Surface {10};
     Recombine Surface {11};
     Recombine Surface {12};
+    Recombine Surface {13};
+    Recombine Surface {14};
+    Recombine Surface {15};
+    Recombine Surface {16};
 EndIf
 
 // Create physical surface
@@ -128,8 +140,13 @@ Physical Surface(9) = {9};
 Physical Surface(10) = {10};
 Physical Surface(11) = {11};
 Physical Surface(12) = {12};
+Physical Surface(13) = {13};
+Physical Surface(14) = {14};
+Physical Surface(15) = {15};
+Physical Surface(16) = {16};
 
 // Generate 2D mesh
 Mesh 2;
 SetOrder order;
 Mesh.MshFileVersion = 2.2;
+
