@@ -17,6 +17,7 @@ def options(opt):
     opt.load("compiler_cxx")
 
     # Load tools options
+    opt.load("utils_cpp magnum_dynamics", tooldir="/usr/local/share/waf")
     opt.load("flags eigen mfem", tooldir="waf_tools")
 
     # Add options
@@ -40,6 +41,7 @@ def configure(cfg):
     cfg.get_env()["requires"] += ["EIGEN", "MFEM"]
 
     # Load tools configuration
+    cfg.load("utils_cpp magnum_dynamics", tooldir="/usr/local/share/waf")
     cfg.load("flags eigen mfem", tooldir="waf_tools")
 
     # Remove duplicates
@@ -113,3 +115,7 @@ def build(bld):
             "${PREFIX}/lib",
             blddir + "/lib" + bld.get_env()["libname"] + "." + bld.env.SUFFIX,
         )
+
+    # Install tools
+    bld.install_files("${PREFIX}/share/waf", "scripts/gp_manifold.py")
+    bld.install_files("${PREFIX}/share/waf", "waf_tools/utils.py")
