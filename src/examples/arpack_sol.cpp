@@ -8,7 +8,10 @@ using namespace mfem;
 int main(int argc, char* argv[])
 {
     // Mesh default
-    const char* mesh_file = "rsc/sphere.msh";
+    std::string name = "torus", extension = ".msh", load_path = "rsc/mesh/", save_path = "rsc/sol/",
+                mesh_path = load_path + name + extension;
+
+    const char* mesh_file = mesh_path.c_str();
 
     // Number of times to refine the mesh (in serial)
     int ref_levels = 3;
@@ -40,8 +43,8 @@ int main(int argc, char* argv[])
     int dim = mesh->Dimension();
 
     // Refine the mesh
-    for (int lev = 0; lev < ref_levels; lev++)
-        mesh->UniformRefinement();
+    // for (int lev = 0; lev < ref_levels; lev++)
+    //     mesh->UniformRefinement();
 
     // Shape function order
     FiniteElementCollection* fec;
@@ -128,7 +131,7 @@ int main(int argc, char* argv[])
     // Save the refined mesh and the modes in parallel. This output can be viewed later using GLVis: "glvis -np <np> -m mesh -g mode"
     {
         ostringstream mesh_name, mode_name;
-        mesh_name << "refined_mesh.mesh";
+        mesh_name << save_path << name << "_mesh.mesh";
 
         ofstream mesh_ofs(mesh_name.str().c_str());
         mesh_ofs.precision(8);
@@ -138,7 +141,7 @@ int main(int argc, char* argv[])
             // convert eigenvector from HypreParVector to ParGridFunction
             x = arpack->GetEigenvector(i);
 
-            mode_name << "mode_" << setfill('0') << setw(2) << i;
+            mode_name << save_path << name << "_mode_" << setfill('0') << setw(2) << i;
 
             ofstream mode_ofs(mode_name.str().c_str());
             mode_ofs.precision(8);
