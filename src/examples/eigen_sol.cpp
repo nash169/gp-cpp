@@ -11,7 +11,7 @@ using namespace mfem;
 
 int main(int argc, char* argv[])
 {
-    std::string name = "sphere", extension = ".msh", load_path = "rsc/mesh/", save_path = "rsc/sol/",
+    std::string name = "bun_zipper_res4", extension = ".msh", load_path = "rsc/mesh/", save_path = "rsc/sol/",
                 mesh_path = load_path + name + extension;
 
     const char* mesh_file = mesh_path.c_str();
@@ -41,6 +41,7 @@ int main(int argc, char* argv[])
              << endl;
         return 2;
     }
+
     mesh = new Mesh(imesh, 1, 1);
     imesh.close();
     int dim = mesh->Dimension();
@@ -94,7 +95,6 @@ int main(int argc, char* argv[])
     EigenEigenSolver my_solver;
 
     my_solver.SetOperators(*a, *m);
-
     my_solver.Solve();
 
     GridFunction x(fespace);
