@@ -11,13 +11,24 @@ APPNAME = "gp-manifold"
 srcdir = "."
 blddir = "build"
 
+# Tools' name and directory
+tools = {
+    "utils_cpp": "/home/bernardo/devs/utils-cpp/install",
+    "magnum_dynamics": "/home/bernardo/devs/magnum-dynamics/install",
+    "kernel_lib": "/home/bernardo/devs/kernel-lib/install",
+}
+
 
 def options(opt):
     # Load modules necessary in the configuration function
     opt.load("compiler_cxx")
 
-    # Load tools options
-    opt.load("utils_cpp magnum_dynamics", tooldir="/usr/local/share/waf")
+    # Load personal tools options
+    for key in tools:
+        opt.load(key, tooldir=os.path.join(
+            tools[key], "share/waf"))
+
+    # Load external tools options
     opt.load("flags eigen mfem", tooldir="waf_tools")
 
     # Add options
@@ -38,10 +49,14 @@ def configure(cfg):
     cfg.load("compiler_cxx")  # cfg.load("clang_compilation_database")
 
     # Define require libraries
-    cfg.get_env()["requires"] += ["EIGEN", "MFEM"]
+    cfg.get_env()["requires"] += ["EIGEN", "MFEM", "SPECTRA"]
 
-    # Load tools configuration
-    cfg.load("utils_cpp magnum_dynamics", tooldir="/usr/local/share/waf")
+    # Load personal tools configurations
+    for key in tools:
+        cfg.load(key, tooldir=os.path.join(
+            tools[key], "share/waf"))
+
+    # Load external tools configurations
     cfg.load("flags eigen mfem", tooldir="waf_tools")
 
     # Remove duplicates
