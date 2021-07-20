@@ -7,31 +7,25 @@
 
 int main(int argc, char** argv)
 {
+    std::string mesh_name = "sphere";
     magnum_dynamics::MagnumApp app({argc, argv});
+    utils_cpp::FileManager io_manager;
 
     // Load mesh
-    utils_cpp::FileManager io_manager;
-    Eigen::MatrixXd vertices = io_manager.setFile("rsc/sol/sphere.mesh").read<Eigen::MatrixXd>("vertices", 3),
+    Eigen::MatrixXd vertices = io_manager.setFile("rsc/modes/" + mesh_name + "_mesh.000000").read<Eigen::MatrixXd>("vertices", 3),
                     indices = io_manager.read<Eigen::MatrixXd>("elements", 2);
 
-    size_t num_eig = 10;
-    Eigen::MatrixXd eigenvectors(vertices.rows(), num_eig);
+    // Load eigenvector
+    size_t max_eig = 5;
+    Eigen::VectorXd eigenvector(vertices.rows());
 
-    for (size_t i = 0; i < num_eig; i++) {
-        std::stringstream file_path;
-        file_path << "rsc/sol/sphere_mode_" << i;
-        eigenvectors.col(i) = io_manager.setFile(file_path.str()).read<Eigen::MatrixXd>("", 5);
-    }
+    std::stringstream file_path;
+    file_path << "rsc/modes/" << mesh_name << "_mode_" << (argc >= max_eig ? 1 : argc) << ".000000";
+    eigenvector = io_manager.setFile(file_path.str()).read<Eigen::MatrixXd>("", 5);
 
-    app.plot(vertices, eigenvectors.col(1), indices.block(0, 2, indices.rows(), 3)).setTransformation(Matrix4::translation({0.0f, -3.0f, 3.0f}));
-    app.plot(vertices, eigenvectors.col(2), indices.block(0, 2, indices.rows(), 3)).setTransformation(Matrix4::translation({0.0f, 0.0f, 3.0f}));
-    app.plot(vertices, eigenvectors.col(3), indices.block(0, 2, indices.rows(), 3)).setTransformation(Matrix4::translation({0.0f, 3.0f, 3.0f}));
-    app.plot(vertices, eigenvectors.col(4), indices.block(0, 2, indices.rows(), 3)).setTransformation(Matrix4::translation({0.0f, -3.0f, 0.0f}));
-    app.plot(vertices, eigenvectors.col(5), indices.block(0, 2, indices.rows(), 3)).setTransformation(Matrix4::translation({0.0f, 0.0f, 0.0f}));
-    app.plot(vertices, eigenvectors.col(6), indices.block(0, 2, indices.rows(), 3)).setTransformation(Matrix4::translation({0.0f, 3.0f, 0.0f}));
-    app.plot(vertices, eigenvectors.col(7), indices.block(0, 2, indices.rows(), 3)).setTransformation(Matrix4::translation({0.0f, -3.0f, -3.0f}));
-    app.plot(vertices, eigenvectors.col(8), indices.block(0, 2, indices.rows(), 3)).setTransformation(Matrix4::translation({0.0f, 0.0f, -3.0f}));
-    app.plot(vertices, eigenvectors.col(9), indices.block(0, 2, indices.rows(), 3)).setTransformation(Matrix4::translation({0.0f, 3.0f, -3.0f}));
+    // Plot eigenvector
+    app.plot(vertices, eigenvector, indices.block(0, 2, indices.rows(), 3))
+        .setTransformation(Matrix4::translation({0.0f, 0.0f, 0.0f}));
 
     return app.exec();
 }
