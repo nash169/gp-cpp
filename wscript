@@ -13,9 +13,9 @@ blddir = "build"
 
 # Tools' name and directory
 tools = {
-    "utils_cpp": "/home/bernardo/devs/utils-cpp/install",
-    "magnum_dynamics": "/home/bernardo/devs/magnum-dynamics/install",
-    "kernel_lib": "/home/bernardo/devs/kernel-lib/install",
+    "utils_cpp": "/Users/bernardo/Developments/utils-cpp/install",
+    "magnum_dynamics": "/Users/bernardo/Developments/magnum-dynamics/install",
+    "kernel_lib": "/Users/bernardo/Developments/kernel-lib/install",
 }
 
 
@@ -68,6 +68,9 @@ def configure(cfg):
     else:
         cfg.env["lib_type"] = "cxxstlib"
 
+    cfg.env.LIB_EXTRA += ["X11", "c++"]
+    cfg.get_env()["libs"] += ["EXTRA"]
+
 
 def build(bld):
     # Library name
@@ -99,7 +102,6 @@ def build(bld):
             target=bld.get_env()["libname"],
             includes=includes_path,
             uselib=bld.get_env()["libs"],
-            cxxxflags=bld.get_env()["CXXFLAGS"],
         )
     else:
         bld.stlib(
@@ -108,7 +110,6 @@ def build(bld):
             target=bld.get_env()["libname"],
             includes=includes_path,
             uselib=bld.get_env()["libs"],
-            cxxxflags=bld.get_env()["CXXFLAGS"],
         )
 
     # Build executables
