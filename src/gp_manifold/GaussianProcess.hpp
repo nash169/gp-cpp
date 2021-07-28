@@ -43,7 +43,27 @@ namespace gp_manifold {
         }
 
     protected:
+        // Training points
         Eigen::VectorXd _target;
+
+        // Gaussian distribution
+        utils::Gaussian<Params, kernels::SquaredExpFull<Params>> _gauss;
+
+        double likelihood()
+        {
+            return _gauss.log(_target);
+        }
+
+        auto likelihoodGrad()
+        {
+            Eigen::VectorXd grad(_kernel.sizeParams()), gradKernel = _kernel.gradParams(_target, _target);
+            Eigen::MatrixXd gradGauss = Eigen::Map<Eigen::MatrixXd>(_gauss.gradParams(_target).segment(0, _target.size() * _target.size()).data(), _target.size(), _target.size());
+
+            for (size_t i = 0; i < _kernel.sizeParams(); i++)
+                grad(i) = 0.5 * (gradGauss * gradKernel(i)).trace();
+
+            return grad;
+        }
     };
 } // namespace gp_manifold
 
