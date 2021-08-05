@@ -29,7 +29,7 @@ def options(opt):
             tools[key], "share/waf"))
 
     # Load external tools options
-    opt.load("flags eigen mfem", tooldir="waf_tools")
+    opt.load("flags eigen mfem ipopt nlopt", tooldir="waf_tools")
 
     # Add options
     opt.add_option("--shared",
@@ -57,7 +57,7 @@ def configure(cfg):
             tools[key], "share/waf"))
 
     # Load external tools configurations
-    cfg.load("flags eigen mfem", tooldir="waf_tools")
+    cfg.load("flags eigen mfem ipopt nlopt", tooldir="waf_tools")
 
     # Remove duplicates
     cfg.get_env()["libs"] = list(set(cfg.get_env()["libs"]))
