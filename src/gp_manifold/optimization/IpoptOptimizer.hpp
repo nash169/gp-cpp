@@ -24,6 +24,22 @@ namespace gp_manifold {
         public:
             IpoptOptimizer() : _app(IpoptApplicationFactory())
             {
+                // Change some options
+                // Note: The following choices are only examples, they might not be
+                //       suitable for your optimization problem.
+                // app->Options()->SetNumericValue("tol", 3.82e-6);
+                // app->Options()->SetStringValue("mu_strategy", "adaptive");
+                // app->Options()->SetStringValue("output_file", "ipopt.out");
+                // The following overwrites the default name (ipopt.opt) of the options file
+                // app->Options()->SetStringValue("option_file_name", "hs071.opt");
+
+                // AddIpoptNumOption(nlp, const_cast<char*>("tol"), 1e-6);
+                // AddIpoptStrOption(nlp, const_cast<char*>("mu_strategy"), const_cast<char*>("adaptive"));
+                // AddIpoptStrOption(nlp, const_cast<char*>("hessian_approximation"), const_cast<char*>("limited-memory"));
+                // // AddIpoptStrOption(nlp, "output_file", "ipopt.out");
+                // AddIpoptStrOption(nlp, const_cast<char*>("linear_solver"), const_cast<char*>("ma57"));
+                // AddIpoptIntOption(nlp, const_cast<char*>("max_iter"), 500);
+                // AddIpoptIntOption(nlp, const_cast<char*>("print_level"), verbose);
             }
 
             ~IpoptOptimizer()
