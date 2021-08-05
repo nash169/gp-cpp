@@ -13,9 +13,9 @@ blddir = "build"
 
 # Tools' name and directory
 tools = {
-    "utils_cpp": "/Users/bernardo/Developments/utils-cpp/install",
-    "magnum_dynamics": "/Users/bernardo/Developments/magnum-dynamics/install",
-    "kernel_lib": "/Users/bernardo/Developments/kernel-lib/install",
+    "utils_cpp": "",
+    "magnum_dynamics": "",
+    "kernel_lib": "",
 }
 
 

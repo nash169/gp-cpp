@@ -411,3 +411,4 @@ refined_mesh*
 
 # macOS
 .DS_Store
+waf_configure
