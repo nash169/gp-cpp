@@ -1,10 +1,12 @@
 #include <iostream>
 #include <sstream>
 
-#include <Eigen/Core>
+// #include <Eigen/Core>
 #include <gp_manifold/GaussianProcess.hpp>
 #include <magnum_dynamics/MagnumApp.hpp>
 #include <utils_cpp/UtilsCpp.hpp>
+
+#include <Eigen/Dense>
 
 using namespace gp_manifold;
 using namespace kernel_lib;
@@ -17,6 +19,12 @@ struct ParamsExp {
 
     struct exp_sq : public defaults::exp_sq {
         PARAM_SCALAR(double, l, -0.3566);
+    };
+
+    struct exp_sq_full : public defaults::exp_sq_full {
+    };
+
+    struct gaussian : public defaults::gaussian {
     };
 };
 
@@ -38,14 +46,17 @@ int main(int argc, char** argv)
     using GP_t = GaussianProcess<ParamsExp, Kernel_t>;
     GP_t gp;
 
+    Eigen::MatrixXd test = Eigen::MatrixXd::Random(4, 4), test2 = Eigen::MatrixXd::Random(5, 5);
+
     // Set training point and target
-    gp.setReference(reference).setTarget(target).update();
+    gp.setSamples(reference).setTarget(target).update();
+    gp.optimize();
 
-    // Evaluation of the GP on all the mesh points
-    Eigen::VectorXd gp_sol = gp.multiEval(nodes);
+    // // Evaluation of the GP on all the mesh points
+    // Eigen::VectorXd gp_sol = gp.multiEval(nodes);
 
-    // Save GP solution
-    io_manager.setFile("rsc/solutions/" + mesh_name + "_gp.csv").write(gp_sol);
+    // // Save GP solution
+    // io_manager.setFile("rsc/solutions/" + mesh_name + "_gp.csv").write(gp_sol);
 
     return 0;
 }

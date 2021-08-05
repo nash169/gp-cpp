@@ -32,6 +32,12 @@ struct ParamsRiemann {
     struct riemann_exp_sq : public defaults::riemann_exp_sq {
         PARAM_SCALAR(double, l, -2.3025);
     };
+
+    struct exp_sq_full : public defaults::exp_sq_full {
+    };
+
+    struct gaussian : public defaults::gaussian {
+    };
 };
 
 int main(int argc, char** argv)
@@ -94,12 +100,12 @@ int main(int argc, char** argv)
     PetscPrintf(PETSC_COMM_WORLD, "\nThe eigenvector is:\n\n");
     VecView(eigenvec, PETSC_VIEWER_STDOUT_WORLD);
 
-    // Riemann Gaussian Process
-    using Kernel_t = kernels::SquaredExp<ParamsExp>;
-    using Expansion_t = utils::Expansion<ParamsExp, Kernel_t>;
-    using Riemann_t = kernels::RiemannSqExp<ParamsRiemann, Expansion_t>;
-    using RGP_t = GaussianProcess<ParamsRiemann, Riemann_t>;
-    RGP_t rgp;
+    // // Riemann Gaussian Process
+    // using Kernel_t = kernels::SquaredExp<ParamsExp>;
+    // using Expansion_t = utils::Expansion<ParamsExp, Kernel_t>;
+    // using Riemann_t = kernels::RiemannSqExp<ParamsRiemann, Expansion_t>;
+    // using RGP_t = GaussianProcess<ParamsRiemann, Riemann_t>;
+    // RGP_t rgp;
 
     // // Set kernel eigen pairs
     // for (size_t i = 1; i < num_eig; i++) {
