@@ -3,6 +3,8 @@
 
 #include "gp_manifold/optimization/AbstractOptimizer.hpp"
 
+#include <IpIpoptApplication.hpp>
+#include <IpSolveStatistics.hpp>
 #include <IpTNLP.hpp>
 
 #include <cassert>
@@ -14,32 +16,26 @@
 using namespace Ipopt;
 
 namespace gp_manifold {
-    namespace defaults {
-        struct ipopt {
-        };
-    } // namespace defaults
+    // namespace defaults {
+    //     struct ipopt {
+    //     };
+    // } // namespace defaults
 
     namespace optimization {
         class IpoptOptimizer : public AbstractOptimizer, public TNLP {
         public:
             IpoptOptimizer() : _app(IpoptApplicationFactory())
             {
-                // Change some options
-                // Note: The following choices are only examples, they might not be
-                //       suitable for your optimization problem.
-                // app->Options()->SetNumericValue("tol", 3.82e-6);
-                // app->Options()->SetStringValue("mu_strategy", "adaptive");
-                // app->Options()->SetStringValue("output_file", "ipopt.out");
-                // The following overwrites the default name (ipopt.opt) of the options file
-                // app->Options()->SetStringValue("option_file_name", "hs071.opt");
+                // Default options
+                _app->Options()->SetNumericValue("tol", 1e-6);
+                // _app->Options()->SetNumericValue("max_iter", 500);
+                // _app->Options()->SetNumericValue("print_level", 5); // 0 <= print_level <= 2
+                _app->Options()->SetStringValue("mu_strategy", "adaptive");
+                // _app->Options()->SetStringValue("linear_solver", "ma57");
+                // _app->Options()->SetStringValue("output_file", "ipopt.out");
 
-                // AddIpoptNumOption(nlp, const_cast<char*>("tol"), 1e-6);
-                // AddIpoptStrOption(nlp, const_cast<char*>("mu_strategy"), const_cast<char*>("adaptive"));
-                // AddIpoptStrOption(nlp, const_cast<char*>("hessian_approximation"), const_cast<char*>("limited-memory"));
-                // // AddIpoptStrOption(nlp, "output_file", "ipopt.out");
-                // AddIpoptStrOption(nlp, const_cast<char*>("linear_solver"), const_cast<char*>("ma57"));
-                // AddIpoptIntOption(nlp, const_cast<char*>("max_iter"), 500);
-                // AddIpoptIntOption(nlp, const_cast<char*>("print_level"), verbose);
+                // The following overwrites the default name (ipopt.opt) of the options file
+                // _app->Options()->SetStringValue("option_file_name", "hs071.opt");
             }
 
             ~IpoptOptimizer()
@@ -68,10 +64,10 @@ namespace gp_manifold {
                     std::cout << std::endl
                               << std::endl
                               << "*** The problem FAILED!" << std::endl;
-                    return (bool)status;
+                    return (int)status ? false : true;
                 }
 
-                return (bool)status;
+                return (int)status ? false : true;
             }
 
             /** Method to return some info about the nlp */
@@ -327,9 +323,9 @@ namespace gp_manifold {
             {
                 // here is where we would store the solution to variables, or write to a file, etc
                 // so we could use the solution.
+                _xSol = Eigen::Map<Eigen::VectorXd>((double*)x, n);
 
                 // For this example, we write the solution to the console
-
                 std::cout << std::endl
                           << std::endl
                           << "Solution of the primal variables, x" << std::endl;

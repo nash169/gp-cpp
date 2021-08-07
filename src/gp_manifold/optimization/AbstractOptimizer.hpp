@@ -11,7 +11,7 @@ namespace gp_manifold {
     namespace optimization {
         class AbstractOptimizer {
         public:
-            AbstractOptimizer() : _n(1), _m(0), _x0(Eigen::VectorXd::Random(1))
+            AbstractOptimizer() : _n(1), _m(0), _x0(Eigen::VectorXd::Random(1)), _xSol(1)
             {
             }
 
@@ -26,6 +26,7 @@ namespace gp_manifold {
 
                 // Resize
                 _x0.conservativeResize(n);
+                _xSol.conservativeResize(n);
 
                 // should be withing the constraits (maybe put this in the first ipopt function)
                 _x0 = Eigen::VectorXd::Random(n);
@@ -117,7 +118,7 @@ namespace gp_manifold {
                 _m; // Number of constraints
 
             // Starting point
-            Eigen::VectorXd _x0;
+            Eigen::VectorXd _x0, _xSol;
 
             // Objective (maybe allow for multiple objectives)
             std::function<double(const Eigen::VectorXd&)> _f;
