@@ -44,6 +44,14 @@ namespace gp_manifold {
             return *this;
         }
 
+        /*
+        EPS_HEP     ->  Hermitian
+        EPS_NHEP    ->  Non-Hermitian
+        EPS_GHEP    ->  Generalized Hermitian
+        EPS_GHIEP   ->  Generalized Hermitian indefinite
+        EPS_GNHEP   ->  Generalized Non-Hermitian 
+        EPS_PGNHEP  ->  GNHEP with positive (semi-)definite B
+        */
         SlepcSolver& problem(const EPSProblemType& problem)
         {
             /* Set problem type */
@@ -53,6 +61,19 @@ namespace gp_manifold {
             return *this;
         }
 
+        /*
+        EPS_LARGEST_MAGNITUDE
+        EPS_SMALLEST_MAGNITUDE
+        EPS_LARGEST_REAL
+        EPS_SMALLEST_REAL
+        EPS_LARGEST_IMAGINARY
+        EPS_SMALLEST_IMAGINARY
+        EPS_TARGET_MAGNITUDE
+        EPS_TARGET_REAL
+        EPS_TARGET_IMAGINARY
+        EPS_ALL
+        EPS_WHICH_USER
+        */
         SlepcSolver& spectrum(EPSWhich which)
         {
             _ierr = EPSSetWhichEigenpairs(_eps, which);
@@ -105,6 +126,29 @@ namespace gp_manifold {
             return *this;
         }
 
+        SlepcSolver& target(double target)
+        {
+            _ierr = EPSSetTarget(_eps, target);
+            CHKERRABORT(PETSC_COMM_WORLD, _ierr);
+
+            return *this;
+        }
+
+        /*
+        STSHIFT
+        STSINVERT
+        */
+        SlepcSolver& spectralTransformation(const STType& transformation)
+        {
+            ST st;
+            _ierr = EPSGetST(_eps, &st);
+            CHKERRABORT(PETSC_COMM_WORLD, _ierr);
+            _ierr = STSetType(st, STSINVERT);
+            CHKERRABORT(PETSC_COMM_WORLD, _ierr);
+
+            return *this;
+        }
+
         int converged()
         {
             PetscInt num_conv;
@@ -125,7 +169,7 @@ namespace gp_manifold {
             CHKERRABORT(PETSC_COMM_WORLD, _ierr);
         }
 
-        PetscScalar eigenvalue(const size_t& i)
+        double eigenvalue(const size_t& i)
         {
             _ierr = EPSGetEigenvalue(_eps, i, &_kr, &_ki);
             // CHKERRQ(_ierr);
@@ -133,12 +177,26 @@ namespace gp_manifold {
             return _kr;
         }
 
-        Vec eigenvector(unsigned int i)
+        Eigen::VectorXd eigenvector(unsigned int i)
         {
+            // Retrieve eigenvector
             _ierr = EPSGetEigenvector(_eps, i, _xr, _xi);
-            // CHKERRQ(_ierr);
+            CHKERRABORT(PETSC_COMM_WORLD, _ierr);
 
-            return _xr;
+            // PetscPrintf(PETSC_COMM_WORLD, "\nThe eigenvector is:\n\n");
+            // VecView(_xr, PETSC_VIEWER_STDOUT_WORLD);
+
+            // Get vector size
+            int size;
+            _ierr = VecGetLocalSize(_xr, &size);
+            CHKERRABORT(PETSC_COMM_WORLD, _ierr);
+
+            // Get data pointer
+            PetscScalar* data;
+            _ierr = VecGetArray(_xr, &data);
+            CHKERRABORT(PETSC_COMM_WORLD, _ierr);
+
+            return Eigen::Map<Eigen::VectorXd>(data, size);
         }
 
         ~SlepcSolver()
