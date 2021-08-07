@@ -68,8 +68,8 @@ def configure(cfg):
     else:
         cfg.env["lib_type"] = "cxxstlib"
 
-    cfg.env.LIB_EXTRA += ["X11", "c++"]
-    cfg.get_env()["libs"] += ["EXTRA"]
+    # cfg.env.LIB_EXTRA += ["X11", "c++"]
+    # cfg.get_env()["libs"] += ["EXTRA"]
 
 
 def build(bld):
