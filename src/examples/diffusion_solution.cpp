@@ -91,14 +91,14 @@ int main(int argc, char** argv)
         .tolerance(1e-3) // Set tolerance
         .solve(); // Solve the problem
 
-    // Number of eigenvalues converged
-    std::cout << "Number of converged eigenvalues: " << solver.converged() << std::endl;
+    // // Number of eigenvalues converged
+    // std::cout << "Number of converged eigenvalues: " << solver.converged() << std::endl;
 
-    // Get eigenvector
-    Vec eigenvec = solver.eigenvector(1);
+    // // Get eigenvector
+    // Vec eigenvec = solver.eigenvector(1);
 
-    PetscPrintf(PETSC_COMM_WORLD, "\nThe eigenvector is:\n\n");
-    VecView(eigenvec, PETSC_VIEWER_STDOUT_WORLD);
+    // PetscPrintf(PETSC_COMM_WORLD, "\nThe eigenvector is:\n\n");
+    // VecView(eigenvec, PETSC_VIEWER_STDOUT_WORLD);
 
     // // Riemann Gaussian Process
     // using Kernel_t = kernels::SquaredExp<ParamsExp>;

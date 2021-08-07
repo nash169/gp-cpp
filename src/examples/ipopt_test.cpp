@@ -4,6 +4,7 @@
 #include <gp_manifold/optimization/IpoptOptimizer.hpp>
 
 #include <iostream>
+#include <memory>
 
 using namespace Ipopt;
 using namespace gp_manifold;
@@ -120,6 +121,7 @@ int main(int, char**)
 
     // Create an instance of your nlp...
     SmartPtr<optimization::IpoptOptimizer> mynlp = new optimization::IpoptOptimizer();
+    // SmartPtr<optimization::IpoptOptimizer> mynlp(new optimization::IpoptOptimizer());
 
     // Set optimization problem
     (*mynlp)
