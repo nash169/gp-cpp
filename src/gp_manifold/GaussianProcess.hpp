@@ -1,18 +1,23 @@
 #ifndef GP_MANIFOLD_GAUSSIAN_PROCESS
 #define GP_MANIFOLD_GAUSSIAN_PROCESS
 
+#include <memory>
+#include <type_traits>
+
 #include <kernel_lib/Kernel.hpp>
+#include <utils_cpp/UtilsCpp.hpp>
 
 #include "gp_manifold/optimization/AbstractOptimizer.hpp"
 
 namespace gp_manifold {
     using namespace kernel_lib;
 
-    template <typename Params, typename Kernel, typename Optimizer = optimization::AbstractOptimizer>
+    template <typename Params, typename Kernel, typename Optimizer = std::unique_ptr<optimization::AbstractOptimizer>>
     class GaussianProcess : public utils::Expansion<Params, Kernel> {
     public:
-        GaussianProcess() : _opt()
+        GaussianProcess()
         {
+            _opt = Optimizer(new typename std::remove_reference<decltype(*_opt)>::type);
         }
 
         GaussianProcess& setSamples(const Eigen::MatrixXd& x) override
@@ -52,7 +57,7 @@ namespace gp_manifold {
             Eigen::VectorXd params_gauss = Eigen::VectorXd::Zero(_y.size() * _y.size() + _y.size());
 
             // Set gram matrix
-            params_gauss.segment(0, _y.size() * _y.size()) = Eigen::Map<Eigen::VectorXd>(_k.gram(_y, _y).data(), _y.size() * _y.size());
+            params_gauss.segment(0, _y.size() * _y.size()) = Eigen::Map<Eigen::VectorXd>(_k.gram(_x, _x).data(), _y.size() * _y.size());
 
             // Set Gaussian params
             _g.setParams(params_gauss);
@@ -63,7 +68,7 @@ namespace gp_manifold {
             // Set params likelihood (no mean optimization at the moment)
             setLikelihood(params);
 
-            return _g.log(_y);
+            return -_g.log(_y);
         }
 
         auto likelihoodGrad(const Eigen::VectorXd& params)
@@ -72,25 +77,82 @@ namespace gp_manifold {
             setLikelihood(params);
 
             // Params gradient of the kernel
-            Eigen::VectorXd grad(_k.sizeParams()), gradKernel = _k.gradParams(_y, _y);
+            Eigen::MatrixXd gradKernel = _k.gramGradParams(_x, _x);
 
-            // Params gradient of the Gaussian distribution
+            // Params gradient of the Gaussian distribution (only covariance)
             Eigen::MatrixXd gradGauss = Eigen::Map<Eigen::MatrixXd>(_g.gradParams(_y).segment(0, _y.size() * _y.size()).data(), _y.size(), _y.size());
 
             // Total gradient
+            Eigen::VectorXd grad(_k.sizeParams());
             for (size_t i = 0; i < _k.sizeParams(); i++)
-                grad(i) = 0.5 * (gradGauss * gradKernel(i)).trace();
+                grad(i) = (gradGauss * Eigen::Map<Eigen::MatrixXd>(gradKernel.col(i).data(), _y.size(), _y.size())).trace();
 
-            return grad;
+            return -grad;
         }
 
-        void optimize()
+        bool optimize()
         {
             // For passing methods of a class: https://stackoverflow.com/questions/7582546/using-generic-stdfunction-objects-with-member-functions-in-one-class
             // https://stackoverflow.com/questions/26331628/reference-to-non-static-member-function-must-be-called
 
             // double (GaussianProcess<Params, Kernel, Optimizer>::*function)(const Eigen::VectorXd&) = &GaussianProcess<Params, Kernel, Optimizer>::likelihood;
-            _opt.setObjective(std::bind(&GaussianProcess<Params, Kernel, Optimizer>::likelihood, this, std::placeholders::_1));
+            (*_opt)
+                .setDimension(this->sizeParams())
+                .setStartingPoint(this->params())
+                .setObjective(std::bind(&GaussianProcess<Params, Kernel, Optimizer>::likelihood, this, std::placeholders::_1))
+                .setObjectiveGradient(std::bind(&GaussianProcess<Params, Kernel, Optimizer>::likelihoodGrad, this, std::placeholders::_1));
+
+            return _opt->optimize();
+        }
+
+        bool check()
+        {
+            std::cout << "Number of params: " << this->sizeParams() << std::endl;
+
+            utils_cpp::DerivativeChecker checker(this->sizeParams());
+
+            return checker.checkGradient(std::bind(&GaussianProcess<Params, Kernel, Optimizer>::likelihood, this, std::placeholders::_1),
+                std::bind(&GaussianProcess<Params, Kernel, Optimizer>::likelihoodGrad, this, std::placeholders::_1));
+        }
+
+        // double sigma(const Eigen::VectorXd& x)
+        // {
+        //     Eigen::MatrixXd G = _k.gram(_x, _x);
+
+        //     Eigen::LLT<Eigen::MatrixXd, Eigen::Upper> U = G.selfadjointView<Eigen::Upper>().llt();
+
+        //     Eigen::VectorXd y = _k(_x, x);
+
+        //     return _k(x, x) - y.transpose() * U.solve(y);
+        // }
+
+        // Eigen::VectorXd multiSigma(const Eigen::MatrixXd& x)
+        // {
+        //     Eigen::MatrixXd G = _k.gram(_x, _x);
+
+        //     Eigen::LLT<Eigen::MatrixXd, Eigen::Upper> U = G.selfadjointView<Eigen::Upper>().llt();
+
+        //     Eigen::VectorXd sigma(x.rows()), y = _k(_x, x);
+
+        //     for (size_t i = 0; i < x.rows(); i++)
+        //     sigma(i) = _k(x.row(i), x) - y.transpose() * U.solve(y);
+
+        //     return sigma;
+        // }
+
+        Eigen::VectorXd params() const
+        {
+            return _k.params();
+        }
+
+        GaussianProcess& setParams(const Eigen::VectorXd& params)
+        {
+            _k.setParams(params);
+        }
+
+        size_t sizeParams() const
+        {
+            return _k.sizeParams();
         }
 
     protected:
