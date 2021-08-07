@@ -1,6 +1,6 @@
 Mesh.Algorithm = 6;
 
-lc = 0.5;
+lc = 0.1;
 Point(1) = {0.0,0.0,0.0,lc};
 Point(2) = {1,0.0,0.0,lc};
 Point(3) = {0,1,0.0,lc};
