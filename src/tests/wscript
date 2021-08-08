@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+import os
+import fnmatch
+
+
+def build(bld):
+    # Includes
+    includes_path = ".."
+
+    # Get source files
+    sources = []
+    for root, _, filenames in os.walk(bld.path.abspath()):
+        for filename in fnmatch.filter(filenames, "*.cpp"):
+            sources.append(os.path.join(root, filename))
+    sources = [f[len(bld.path.abspath()) + 1:] for f in sources]
+
+    # External required libraries for the tests
+    # test_required = {"laplace_problem.cpp": ["UTILSCPP", "MAGNUMDYNAMICS"]}
+    test_required = {}
+
+    # External optional libraries for the tests
+    test_optional = {}
+
+    # Compile all the tests
+    for test in sources:
+        # Activate optional defines
+        if test in test_optional and set(test_optional[test]).issubset(bld.env["libs"]):
+            optional_defines = None
+        else:
+            optional_defines = None
+
+        if test in test_required:
+            if set(test_required[test]).issubset(bld.env["libs"]):
+                bld.program(
+                    features="cxx",
+                    install_path=None,
+                    source=test,
+                    includes=includes_path,
+                    uselib=bld.env["libs"],
+                    use=bld.env["libname"],
+                    defines=optional_defines,
+                    target=test[: len(test) - len(".cpp")],
+                )
+        else:
+            bld.program(
+                features="cxx",
+                install_path=None,
+                source=test,
+                includes=includes_path,
+                uselib=bld.env["libs"],
+                use=bld.env["libname"],
+                defines=optional_defines,
+                target=test[: len(test) - len(".cpp")],
+            )

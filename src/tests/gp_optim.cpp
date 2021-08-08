@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 
     // Save GP solution
     utils_cpp::FileManager io_manager;
-    io_manager.setFile("rsc/solutions/temp_gp.csv").write("X", x, "Y", y, "sample_x", sample_x, "sample_y", sample_y, "GP", gp.multiEval(x));
+    io_manager.setFile("rsc/solutions/1d_gp.csv").write("X", x, "Y", y, "sample_x", sample_x, "sample_y", sample_y, "GP", gp.multiEval(x));
 
     // gp.check();
 

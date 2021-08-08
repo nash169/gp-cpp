@@ -50,13 +50,12 @@ int main(int argc, char** argv)
 
     // Set training point and target
     gp.setSamples(reference).setTarget(target).update();
-    gp.optimize();
 
-    // // Evaluation of the GP on all the mesh points
-    // Eigen::VectorXd gp_sol = gp.multiEval(nodes);
+    // Evaluation of the GP on all the mesh points
+    Eigen::VectorXd gp_sol = gp.multiEval(nodes);
 
-    // // Save GP solution
-    // io_manager.setFile("rsc/solutions/" + mesh_name + "_gp.csv").write(gp_sol);
+    // Save GP solution
+    io_manager.setFile("rsc/solutions/ambient_" + mesh_name + "_gp.csv").write(gp_sol);
 
     return 0;
 }

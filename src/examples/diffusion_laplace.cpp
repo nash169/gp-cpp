@@ -104,12 +104,15 @@ int main(int argc, char** argv)
 
     // Save eigenvalues & eigenvector
     Eigen::VectorXd eigs(nev);
+    Eigen::MatrixXd vecs(num_samples, nev);
+
     for (size_t i = 0; i < nev; i++) {
         eigs(i) = solver.eigenvalue(i);
-        io_manager.setFile("rsc/modes/diffusion_" + mesh_name + "_mode_" + std::to_string(i) + ".000000").write("mode", solver.eigenvector(i));
+        vecs.col(i) = solver.eigenvector(i);
     }
 
-    io_manager.setFile("rsc/modes/diffusion_" + mesh_name + "_eigs.000000").write(eigs);
+    io_manager.setFile("rsc/modes/diffusion_" + mesh_name + "_modes.000000").write("modes", vecs);
+    io_manager.setFile("rsc/modes/diffusion_" + mesh_name + "_eigs.000000").write("eigs", eigs);
 
     return 0;
 }

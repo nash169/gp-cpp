@@ -60,73 +60,37 @@ int main(int argc, char** argv)
     Eigen::VectorXd ground_truth = io_manager.setFile("rsc/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>(),
                     target = io_manager.setFile("rsc/truth/" + mesh_name + "_target.csv").read<Eigen::MatrixXd>();
 
-    // Geometric Laplacian
-    double eps = 2 * std::pow(std::exp(-0.3566), 2);
-    size_t num_samples = vertices.rows(), nn = 50, skip_diag = 1;
-    utils::Graph graph;
+    // Loads eigenvalues and eigenvectors
+    Eigen::VectorXd eigenvalues = io_manager.setFile("rsc/modes/diffusion_" + mesh_name + "_eigs.000000").read<Eigen::MatrixXd>("eigs", 2);
+    Eigen::MatrixXd eigenvectors = io_manager.setFile("rsc/modes/diffusion_" + mesh_name + "_modes.000000").read<Eigen::MatrixXd>("modes", 2);
 
-    Eigen::SparseMatrix<double, Eigen::RowMajor> L = graph.kNearestWeighted(vertices, kernels::SquaredExp<ParamsExp>(), nn, skip_diag);
+    // Riemann Gaussian Process
+    using Kernel_t = kernels::SquaredExp<ParamsExp>;
+    using Expansion_t = utils::Expansion<ParamsExp, Kernel_t>;
+    using Riemann_t = kernels::RiemannSqExp<ParamsRiemann, Expansion_t>;
+    using RGP_t = GaussianProcess<ParamsRiemann, Riemann_t>;
+    RGP_t rgp;
 
-    std::vector<Eigen::Triplet<double>> tripletList;
-    for (size_t i = 0; i < L.rows(); i++)
-        tripletList.push_back(Eigen::Triplet<double>(i, i, 1 / L.row(i).sum()));
-    Eigen::SparseMatrix<double, Eigen::RowMajor> D(num_samples, num_samples);
-    D.setFromTriplets(tripletList.begin(), tripletList.end());
+    // Set kernel eigen pairs
+    for (size_t i = 1; i < eigenvalues.size(); i++) {
+        // Create eigenfunction
+        Expansion_t f;
 
-    L = D * L * D;
-    for (size_t i = 0; i < L.rows(); i++)
-        tripletList.push_back(Eigen::Triplet<double>(i, i, 1 / L.row(i).sum()));
-    D.setFromTriplets(tripletList.begin(), tripletList.end());
+        // Set manifold sampled points and weights
+        f.setSamples(vertices).setWeights(eigenvectors.col(i));
 
-    L = (D - L) / eps / 4;
+        // Add eigen-pair to Riemann kernel
+        rgp.kernel().addPair(eigenvalues(i), f);
+    }
 
-    // Create Slepc solver
-    SlepcSolver solver(argc, argv);
+    // Set training point and target
+    rgp.setSamples(reference).setTarget(target).update();
 
-    solver.operators(std::make_unique<PetscMatrix>(L), std::make_unique<PetscMatrix>(D)) // Set opeartors
-        .problem(EPS_PGNHEP) // Set problem type
-        .spectrum(EPS_SMALLEST_MAGNITUDE) // Select smallest eigenvalues
-        .modes(5) // Number of requested eigenvalues
-        .iterations(100) // Set max iter
-        .tolerance(1e-3) // Set tolerance
-        .solve(); // Solve the problem
+    // Evaluation of the GP on all the mesh points
+    Eigen::VectorXd rgp_sol = rgp.multiEval2(nodes);
 
-    // // Number of eigenvalues converged
-    // std::cout << "Number of converged eigenvalues: " << solver.converged() << std::endl;
-
-    // // Get eigenvector
-    // Vec eigenvec = solver.eigenvector(1);
-
-    // PetscPrintf(PETSC_COMM_WORLD, "\nThe eigenvector is:\n\n");
-    // VecView(eigenvec, PETSC_VIEWER_STDOUT_WORLD);
-
-    // // Riemann Gaussian Process
-    // using Kernel_t = kernels::SquaredExp<ParamsExp>;
-    // using Expansion_t = utils::Expansion<ParamsExp, Kernel_t>;
-    // using Riemann_t = kernels::RiemannSqExp<ParamsRiemann, Expansion_t>;
-    // using RGP_t = GaussianProcess<ParamsRiemann, Riemann_t>;
-    // RGP_t rgp;
-
-    // // Set kernel eigen pairs
-    // for (size_t i = 1; i < num_eig; i++) {
-    //     // Create eigenfunction
-    //     Expansion_t f;
-
-    //     // Set manifold sampled points and weights
-    //     f.setReference(vertices).setParams(eigenvectors.col(i));
-
-    //     // Add eigen-pair to Riemann kernel
-    //     rgp.kernel().addPair(eigenvalues(i), f);
-    // }
-
-    // // Set training point and target
-    // rgp.setReference(reference).setTarget(target).update();
-
-    // // Evaluation of the GP on all the mesh points
-    // Eigen::VectorXd rgp_sol = rgp.multiEval2(nodes);
-
-    // // Save GP solution
-    // io_manager.setFile("rsc/solutions/" + mesh_name + "_rgp_diffusion.csv").write(rgp_sol);
+    // Save GP solution
+    io_manager.setFile("rsc/solutions/diffusion_" + mesh_name + "_rgp.csv").write(rgp_sol);
 
     return 0;
 }

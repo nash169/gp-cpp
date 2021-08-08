@@ -16,18 +16,19 @@ int main(int argc, char** argv)
                     faces = io_manager.setFile("rsc/truth/" + mesh_name + "_faces.csv").read<Eigen::MatrixXd>();
 
     Eigen::VectorXd ground_truth = io_manager.setFile("rsc/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>(),
-                    gp = io_manager.setFile("rsc/solutions/" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>(),
-                    rgp_fem = io_manager.setFile("rsc/solutions/" + mesh_name + "_rgp_fem.csv").read<Eigen::MatrixXd>(),
-                    rgp_diffusion = io_manager.setFile("rsc/solutions/" + mesh_name + "_rgp_diffusion.csv").read<Eigen::MatrixXd>();
+                    gp = io_manager.setFile("rsc/solutions/ambient_" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>(),
+                    rgp_fem = io_manager.setFile("rsc/solutions/fem_" + mesh_name + "_rgp.csv").read<Eigen::MatrixXd>(),
+                    rgp_diffusion = io_manager.setFile("rsc/solutions/diffusion_" + mesh_name + "_rgp.csv").read<Eigen::MatrixXd>();
 
-    // std::cout << ground_truth.minCoeff() << " : " << ground_truth.maxCoeff() << std::endl;
-    // std::cout << gp_sol.minCoeff() << " : " << gp_sol.maxCoeff() << std::endl;
-    // std::cout << rgp_sol.minCoeff() << " : " << rgp_sol.maxCoeff() << std::endl;
+    std::cout << ground_truth.minCoeff() << " - " << ground_truth.maxCoeff() << std::endl;
+    std::cout << gp.minCoeff() << " - " << gp.maxCoeff() << std::endl;
+    std::cout << rgp_fem.minCoeff() << " - " << rgp_fem.maxCoeff() << std::endl;
+    std::cout << rgp_diffusion.minCoeff() << " - " << rgp_diffusion.maxCoeff() << std::endl;
 
-    app.plot(nodes, ground_truth, faces).setTransformation(Matrix4::translation({0.0f, 0.0f, 1.5f}));
-    app.plot(nodes, gp, faces).setTransformation(Matrix4::translation({0.0f, -3.0f, -1.5f}));
-    app.plot(nodes, rgp_fem, faces).setTransformation(Matrix4::translation({0.0f, 0.0f, -1.5f}));
-    app.plot(nodes, rgp_diffusion, faces).setTransformation(Matrix4::translation({0.0f, 3.0f, -1.5f}));
+    // app.plot(nodes, ground_truth, faces, -1.2, 1.2);
+    // app.plot(nodes, gp, faces, -1.2, 1.2);
+    // app.plot(nodes, rgp_fem, faces, -1.2, 1.2);
+    app.plot(nodes, rgp_diffusion, faces, -1.2, 1.2);
 
     return app.exec();
 }

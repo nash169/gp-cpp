@@ -43,7 +43,7 @@ int main(int argc, char** argv)
     utils_cpp::FileManager io_manager;
 
     // Load mesh nodes and indices
-    Eigen::MatrixXd vertices = io_manager.setFile("rsc/modes/" + mesh_name + "_mesh.000000").read<Eigen::MatrixXd>("vertices", 3),
+    Eigen::MatrixXd vertices = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_mesh.000000").read<Eigen::MatrixXd>("vertices", 3),
                     indices = io_manager.read<Eigen::MatrixXd>("elements", 2);
 
     // Load FEM eigenvectors
@@ -52,12 +52,12 @@ int main(int argc, char** argv)
 
     for (size_t i = 0; i < num_eig; i++) {
         std::stringstream file_path;
-        file_path << "rsc/modes/" << mesh_name << "_mode_" << i << ".000000";
+        file_path << "rsc/modes/fem_" << mesh_name << "_mode_" << i << ".000000";
         eigenvectors.col(i) = io_manager.setFile(file_path.str()).read<Eigen::MatrixXd>("", 5);
     }
 
     // Load eigenvalues
-    Eigen::VectorXd eigenvalues = io_manager.setFile("rsc/modes/" + mesh_name + "_eigs.000000").read<Eigen::MatrixXd>();
+    Eigen::VectorXd eigenvalues = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_eigs.000000").read<Eigen::MatrixXd>();
 
     // Load ground truth, target and relative nodes
     Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>(),
@@ -67,33 +67,33 @@ int main(int argc, char** argv)
     Eigen::VectorXd ground_truth = io_manager.setFile("rsc/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>(),
                     target = io_manager.setFile("rsc/truth/" + mesh_name + "_target.csv").read<Eigen::MatrixXd>();
 
-    // // Riemannian Gaussian Process
-    // using Kernel_t = kernels::SquaredExp<ParamsExp>;
-    // using Expansion_t = utils::Expansion<ParamsExp, Kernel_t>;
-    // using Riemann_t = kernels::RiemannSqExp<ParamsRiemann, Expansion_t>;
-    // using RGP_t = GaussianProcess<ParamsRiemann, Riemann_t>;
-    // RGP_t rgp;
+    // Riemannian Gaussian Process
+    using Kernel_t = kernels::SquaredExp<ParamsExp>;
+    using Expansion_t = utils::Expansion<ParamsExp, Kernel_t>;
+    using Riemann_t = kernels::RiemannSqExp<ParamsRiemann, Expansion_t>;
+    using RGP_t = GaussianProcess<ParamsRiemann, Riemann_t>;
+    RGP_t rgp;
 
-    // // Set kernel eigen pairs
-    // for (size_t i = 1; i < num_eig; i++) {
-    //     // Create eigenfunction
-    //     Expansion_t f;
+    // Set kernel eigen pairs
+    for (size_t i = 1; i < num_eig; i++) {
+        // Create eigenfunction
+        Expansion_t f;
 
-    //     // Set manifold sampled points and weights
-    //     f.setReference(vertices).setParams(eigenvectors.col(i));
+        // Set manifold sampled points and weights
+        f.setSamples(vertices).setWeights(eigenvectors.col(i));
 
-    //     // Add eigen-pair to Riemann kernel
-    //     rgp.kernel().addPair(eigenvalues(i), f);
-    // }
+        // Add eigen-pair to Riemann kernel
+        rgp.kernel().addPair(eigenvalues(i), f);
+    }
 
-    // // Set training point and target
-    // rgp.setReference(reference).setTarget(target).update();
+    // Set training point and target
+    rgp.setSamples(reference).setTarget(target).update();
 
-    // // Evaluation of the GP on all the mesh points
-    // Eigen::VectorXd rgp_sol = rgp.multiEval2(nodes);
+    // Evaluation of the GP on all the mesh points
+    Eigen::VectorXd rgp_sol = rgp.multiEval2(nodes);
 
-    // // Save GP solution
-    // io_manager.setFile("rsc/solutions/" + mesh_name + "_rgp_fem.csv").write(rgp_sol);
+    // Save GP solution
+    io_manager.setFile("rsc/solutions/fem_" + mesh_name + "_rgp.csv").write(rgp_sol);
 
     return 0;
 }

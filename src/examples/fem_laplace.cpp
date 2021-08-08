@@ -142,10 +142,11 @@ int main(int argc, char* argv[])
 
     // Save eigenvalues
     utils_cpp::FileManager io_manager;
-    io_manager.setFile("rsc/modes/fem_" + mesh_name + "_eigs.000000").write(eigs);
+    io_manager.setFile("rsc/modes/fem_" + mesh_name + "_eigs.000000").write("eigs", eigs);
 
     Vector temp(fespace->GetTrueVSize());
     ParGridFunction x(fespace);
+    Eigen::MatrixXd vecs(size, nev);
 
     // Save the refined mesh and the modes in parallel. This output can be
     // viewed later using GLVis: "glvis -np <np> -m mesh -g mode".
@@ -161,15 +162,12 @@ int main(int argc, char* argv[])
             slepc->GetEigenvector(i, temp);
             x.Distribute(temp);
 
-            mode_name << "rsc/modes/fem_" << mesh_name << "_mode_" << i << "."
-                      << setfill('0') << setw(6) << myid;
-
-            ofstream mode_ofs(mode_name.str().c_str());
-            mode_ofs.precision(8);
-            x.Save(mode_ofs);
-            mode_name.str("");
+            // For now we use directly the vector (works only with one process; check the example to improve this)
+            vecs.col(i) = Eigen::Map<Eigen::VectorXd>(x.GetData(), x.Size());
         }
     }
+
+    io_manager.setFile("rsc/modes/fem_" + mesh_name + "_modes.000000").write("modes", vecs);
 
     // Free the used memory.
     delete slepc;
