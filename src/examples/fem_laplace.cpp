@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     int ser_ref_levels = 2;
     int par_ref_levels = 1;
     int order = 1;
-    int nev = 5;
+    int nev = 100;
     int seed = 75;
     const char* slepcrc_file = "";
 

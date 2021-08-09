@@ -72,7 +72,9 @@ int main(int argc, char** argv)
     RGP_t rgp;
 
     // Set kernel eigen pairs
-    for (size_t i = 1; i < eigenvalues.size(); i++) {
+    int num_modes = 100;
+
+    for (size_t i = 1; i < num_modes; i++) {
         // Create eigenfunction
         Expansion_t f;
 

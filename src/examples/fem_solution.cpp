@@ -46,18 +46,9 @@ int main(int argc, char** argv)
     Eigen::MatrixXd vertices = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_mesh.000000").read<Eigen::MatrixXd>("vertices", 3),
                     indices = io_manager.read<Eigen::MatrixXd>("elements", 2);
 
-    // Load FEM eigenvectors
-    size_t num_eig = 5;
-    Eigen::MatrixXd eigenvectors(vertices.rows(), num_eig);
-
-    for (size_t i = 0; i < num_eig; i++) {
-        std::stringstream file_path;
-        file_path << "rsc/modes/fem_" << mesh_name << "_mode_" << i << ".000000";
-        eigenvectors.col(i) = io_manager.setFile(file_path.str()).read<Eigen::MatrixXd>("", 5);
-    }
-
-    // Load eigenvalues
-    Eigen::VectorXd eigenvalues = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_eigs.000000").read<Eigen::MatrixXd>();
+    // Load eigenvalues & eigenvectors
+    Eigen::VectorXd eigenvalues = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_eigs.000000").read<Eigen::MatrixXd>("eigs", 2);
+    Eigen::MatrixXd eigenvectors = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_modes.000000").read<Eigen::MatrixXd>("modes", 2);
 
     // Load ground truth, target and relative nodes
     Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>(),
@@ -75,7 +66,9 @@ int main(int argc, char** argv)
     RGP_t rgp;
 
     // Set kernel eigen pairs
-    for (size_t i = 1; i < num_eig; i++) {
+    int num_modes = 100;
+
+    for (size_t i = 1; i < num_modes; i++) {
         // Create eigenfunction
         Expansion_t f;
 

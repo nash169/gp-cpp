@@ -20,7 +20,7 @@ struct ParamsExp {
     };
 
     struct exp_sq : public defaults::exp_sq {
-        PARAM_SCALAR(double, l, -2.30259); // -2.99573
+        PARAM_SCALAR(double, l, -2.99573); // -4.6052 -2.99573 -2.30259 -0.6931 (0.01 0.05 0.1 0.5)
     };
 };
 
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
     // L = (D - L) / eps / 4;
 
     // Create Slepc solver
-    int nev = 5;
+    int nev = 100;
     SlepcSolver solver(argc, argv);
 
     // solver.operators(std::make_unique<PetscMatrix>(L), std::make_unique<PetscMatrix>(D)) // Set opeartors

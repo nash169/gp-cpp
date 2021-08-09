@@ -30,16 +30,14 @@ int main(int argc, char** argv)
     Eigen::MatrixXd fem_vecs = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_modes.000000").read<Eigen::MatrixXd>("modes", 2),
                     diffusion_vecs = io_manager.setFile("rsc/modes/diffusion_" + mesh_name + "_modes.000000").read<Eigen::MatrixXd>("modes", 2);
 
-    // std::cout << fem_vertices.block(0, 0, 5, fem_vertices.cols()) << std::endl;
-    // std::cout << std::endl;
-    // std::cout << fem_indices.block(0, 0, 5, fem_indices.cols()) << std::endl;
-
-    std::cout << fem_vecs.col(2).maxCoeff() << " - " << fem_vecs.col(2).minCoeff() << std::endl;
-    std::cout << diffusion_vecs.col(2).maxCoeff() << " - " << diffusion_vecs.col(2).minCoeff() << std::endl;
-
     // Plot eigenvector
-    // app.plot(fem_vertices, fem_vecs.col(2), fem_indices, -0.05, 0.05);
-    app.plot(diffusion_vertices, diffusion_vecs.col(2), diffusion_indices, -0.05, 0.05);
+    int fun_to_plot = 4;
+
+    // std::cout << fem_vecs.col(fun_to_plot).maxCoeff() << " - " << fem_vecs.col(fun_to_plot).minCoeff() << std::endl;
+    // app.plot(fem_vertices, fem_vecs.col(fun_to_plot), fem_indices, -0.06, 0.06);
+
+    std::cout << diffusion_vecs.col(fun_to_plot).maxCoeff() << " - " << diffusion_vecs.col(fun_to_plot).minCoeff() << std::endl;
+    app.plot(diffusion_vertices, diffusion_vecs.col(fun_to_plot), diffusion_indices, -0.055, 0.055);
 
     return app.exec();
 }

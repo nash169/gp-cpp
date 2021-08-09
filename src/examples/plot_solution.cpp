@@ -20,14 +20,18 @@ int main(int argc, char** argv)
                     rgp_fem = io_manager.setFile("rsc/solutions/fem_" + mesh_name + "_rgp.csv").read<Eigen::MatrixXd>(),
                     rgp_diffusion = io_manager.setFile("rsc/solutions/diffusion_" + mesh_name + "_rgp.csv").read<Eigen::MatrixXd>();
 
-    std::cout << ground_truth.minCoeff() << " - " << ground_truth.maxCoeff() << std::endl;
-    std::cout << gp.minCoeff() << " - " << gp.maxCoeff() << std::endl;
-    std::cout << rgp_fem.minCoeff() << " - " << rgp_fem.maxCoeff() << std::endl;
-    std::cout << rgp_diffusion.minCoeff() << " - " << rgp_diffusion.maxCoeff() << std::endl;
+    // Plot
 
+    // std::cout << ground_truth.minCoeff() << " - " << ground_truth.maxCoeff() << std::endl;
     // app.plot(nodes, ground_truth, faces, -1.2, 1.2);
+
+    // std::cout << gp.minCoeff() << " - " << gp.maxCoeff() << std::endl;
     // app.plot(nodes, gp, faces, -1.2, 1.2);
-    // app.plot(nodes, rgp_fem, faces, -1.2, 1.2);
+
+    // std::cout << rgp_fem.minCoeff() << " - " << rgp_fem.maxCoeff() << std::endl;
+    // app.plot(nodes, rgp_fem, faces, -1.1, 1.1);
+
+    std::cout << rgp_diffusion.minCoeff() << " - " << rgp_diffusion.maxCoeff() << std::endl;
     app.plot(nodes, rgp_diffusion, faces, -1.2, 1.2);
 
     return app.exec();
