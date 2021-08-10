@@ -2,13 +2,16 @@
 Gaussian Processes on Manifolds
 
 ## Run
-- Generate ground truth         -> `python scripts/ground_truth path/to/mesh` (use stl file)
+- Generate ground truth         -> `python scripts/ground_truth.py path/to/mesh` (use stl file)
 - Generate samples              -> `./build/src/examples/generate_target` (set mesh name within the exe)
 - FEM eigenfunction             -> `mpirun -np 1 ./build/src/examples/fem_laplace` (set mesh name within the exe)
 - Diffusion maps eigenfunction  -> `mpirun -np 1 ./build/src/examples/diffusion_laplace` (set mesh name within the exe)
 - Ambient solution              -> `./build/src/examples/ambient_solution` (set mesh name within the exe)
 - FEM solution                  -> `./build/src/examples/fem_solution` (set mesh name within the exe)
 - Diffusion maps solution       -> `./build/src/examples/diffusion_solution` (set mesh name within the exe)
+- Plot eigenfunction            -> `./build/src/examples/plot_eigenfun` (set mesh name within the exe)
+- Plot solution                 -> `./build/src/examples/plot_solution` (set mesh name within the exe)
+- Plot embedding                -> `python scripts/plot_embedding.py` (set mesh name within the exe)
 
 ## ToDo
 - Add sigma method to Gaussian Process
