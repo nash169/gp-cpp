@@ -46,7 +46,7 @@ def configure(cfg):
     cfg.env.SUFFIX = "dylib" if cfg.env["DEST_OS"] == "darwin" else "so"
 
     # Load compiler configuration and generate clangd flags
-    cfg.load("compiler_cxx")  # cfg.load("clang_compilation_database")
+    cfg.load("compiler_cxx clang_compilation_database")
 
     # Define require libraries
     cfg.get_env()["requires"] += ["EIGEN", "MFEM", "SPECTRA"]
@@ -67,9 +67,6 @@ def configure(cfg):
         cfg.env["lib_type"] = "cxxshlib"
     else:
         cfg.env["lib_type"] = "cxxstlib"
-
-    # cfg.env.LIB_EXTRA += ["X11", "c++"]
-    # cfg.get_env()["libs"] += ["EXTRA"]
 
 
 def build(bld):
