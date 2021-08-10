@@ -187,7 +187,7 @@ namespace gp_manifold {
             // VecView(_xr, PETSC_VIEWER_STDOUT_WORLD);
 
             // Get vector size
-            int size;
+            PetscInt size;
             _ierr = VecGetLocalSize(_xr, &size);
             CHKERRABORT(PETSC_COMM_WORLD, _ierr);
 

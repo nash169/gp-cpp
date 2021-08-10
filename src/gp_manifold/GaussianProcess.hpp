@@ -164,6 +164,7 @@ namespace gp_manifold {
 
         // Make protected setWeights method
         using utils::Expansion<Params, Kernel>::setWeights;
+        // Logic behind using: https://stackoverflow.com/questions/20790932/what-is-the-logic-behind-the-using-keyword-in-c
 
         // Training points
         Eigen::VectorXd _y;
