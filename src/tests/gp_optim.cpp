@@ -17,18 +17,12 @@ struct ParamsExp {
     struct exp_sq : public defaults::exp_sq {
         PARAM_SCALAR(double, l, -0.3566);
     };
-
-    struct exp_sq_full : public defaults::exp_sq_full {
-    };
-
-    struct gaussian : public defaults::gaussian {
-    };
 };
 
 int main(int argc, char** argv)
 {
     // data
-    int num_sample = 50, res = 200;
+    int num_sample = 30, res = 200;
     double range = 10;
 
     Eigen::VectorXd x = Eigen::VectorXd::LinSpaced(res, -range, range),
@@ -57,6 +51,7 @@ int main(int argc, char** argv)
         std::cout << "Model NOT optimized" << std::endl;
 
     io_manager.append("OPT", gp.multiEval(x));
+    io_manager.append("VARIANCE", gp.multiSigma(x));
 
     return 0;
 }

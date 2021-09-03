@@ -24,23 +24,6 @@ struct ParamsExp {
     };
 };
 
-struct ParamsRiemann {
-    struct kernel : public defaults::kernel {
-        PARAM_SCALAR(double, sf, 0);
-        PARAM_SCALAR(double, sn, -5);
-    };
-
-    struct riemann_exp_sq : public defaults::riemann_exp_sq {
-        PARAM_SCALAR(double, l, -2.3025);
-    };
-
-    struct exp_sq_full : public defaults::exp_sq_full {
-    };
-
-    struct gaussian : public defaults::gaussian {
-    };
-};
-
 int main(int argc, char** argv)
 {
     std::string mesh_name = "sphere", mesh_ext = "msh";

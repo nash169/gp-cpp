@@ -20,12 +20,6 @@ struct ParamsExp {
     struct exp_sq : public defaults::exp_sq {
         PARAM_SCALAR(double, l, -0.3566);
     };
-
-    struct exp_sq_full : public defaults::exp_sq_full {
-    };
-
-    struct gaussian : public defaults::gaussian {
-    };
 };
 
 int main(int argc, char** argv)

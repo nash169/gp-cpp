@@ -12,6 +12,23 @@
 namespace gp_manifold {
     using namespace kernel_lib;
 
+    /* Defaults parameters for the normal distribution (those cannot be initialize in the main) */
+    struct GaussianParams {
+        struct gaussian : public defaults::gaussian {
+        };
+
+        struct kernel : public defaults::kernel {
+        };
+
+        struct exp_sq_full : public defaults::exp_sq_full {
+        };
+    };
+
+    // namespace defaults {
+    //     struct gaussian_process {
+    //     };
+    // } // namespace defaults
+
     template <typename Params, typename Kernel, typename Optimizer = std::unique_ptr<optimization::AbstractOptimizer>>
     class GaussianProcess : public utils::Expansion<Params, Kernel> {
     public:
@@ -20,6 +37,7 @@ namespace gp_manifold {
             _opt = Optimizer(new typename std::remove_reference<decltype(*_opt)>::type);
         }
 
+        /* Set samples */
         GaussianProcess& setSamples(const Eigen::MatrixXd& x) override
         {
             // utils::Expansion<Params, Kernel>::setReference(reference);
@@ -28,6 +46,7 @@ namespace gp_manifold {
             return static_cast<GaussianProcess&>(utils::Expansion<Params, Kernel>::setSamples(x));
         }
 
+        /* Set target */
         GaussianProcess& setTarget(const Eigen::VectorXd& y)
         {
             _y = y;
@@ -35,32 +54,23 @@ namespace gp_manifold {
             return *this;
         }
 
+        /* Update gaussian process model (this automatically perform the cholesky decomposition within the Gaussian) */
         GaussianProcess& update()
         {
-            Eigen::MatrixXd G = _k.gram(_x, _x);
+            // Set Gaussian covariance to automatically perform the cholesky decomposition (within SqExpFull)
+            // for now we use setGaussian because the mean is set to zero (fix this)
+            // put some condition to check if _x is present
+            setGaussian();
 
-            Eigen::LLT<Eigen::MatrixXd, Eigen::Upper> U = G.selfadjointView<Eigen::Upper>().llt();
+            // Eigen::MatrixXd G = _k.gram(_x, _x);
 
-            // std::cout << U.solve(_y) << std::endl;
+            // Eigen::LLT<Eigen::MatrixXd, Eigen::Upper> U = G.selfadjointView<Eigen::Upper>().llt();
 
-            setWeights(U.solve(_y));
+            // setWeights(U.solve(_y));
+
+            setWeights(_g.template covariance<Eigen::LLT<Eigen::Ref<Eigen::MatrixXd>, Eigen::Lower>>().solve(_y));
 
             return *this;
-        }
-
-        void setLikelihood(const Eigen::VectorXd& params)
-        {
-            // Set covariance function parameters (no mean optimization at the moment)
-            _k.setParams(params); // This is setting signal and noise variance as well
-
-            // Set zero mean and covariance matrix for the Gaussian distribution
-            Eigen::VectorXd params_gauss = Eigen::VectorXd::Zero(_y.size() * _y.size() + _y.size());
-
-            // Set gram matrix
-            params_gauss.segment(0, _y.size() * _y.size()) = Eigen::Map<Eigen::VectorXd>(_k.gram(_x, _x).data(), _y.size() * _y.size());
-
-            // Set Gaussian params
-            _g.setParams(params_gauss);
         }
 
         double likelihood(const Eigen::VectorXd& params)
@@ -115,30 +125,32 @@ namespace gp_manifold {
                 std::bind(&GaussianProcess<Params, Kernel, Optimizer>::likelihoodGrad, this, std::placeholders::_1));
         }
 
-        // double sigma(const Eigen::VectorXd& x)
-        // {
-        //     Eigen::MatrixXd G = _k.gram(_x, _x);
+        double sigma(const Eigen::VectorXd& x)
+        {
+            // Eigen::MatrixXd G = _k.gram(_x, _x);
 
-        //     Eigen::LLT<Eigen::MatrixXd, Eigen::Upper> U = G.selfadjointView<Eigen::Upper>().llt();
+            // Eigen::LLT<Eigen::MatrixXd, Eigen::Upper> U = G.selfadjointView<Eigen::Upper>().llt();
 
-        //     Eigen::VectorXd y = _k(_x, x);
+            Eigen::VectorXd y = _k.gram(_x, Eigen::MatrixXd(x.transpose()));
 
-        //     return _k(x, x) - y.transpose() * U.solve(y);
-        // }
+            return _k(x, x) - y.transpose() * _g.template covariance<Eigen::LLT<Eigen::Ref<Eigen::MatrixXd>, Eigen::Lower>>().solve(y);
+        }
 
-        // Eigen::VectorXd multiSigma(const Eigen::MatrixXd& x)
-        // {
-        //     Eigen::MatrixXd G = _k.gram(_x, _x);
+        Eigen::VectorXd multiSigma(const Eigen::MatrixXd& x)
+        {
+            // Eigen::MatrixXd G = _k.gram(_x, _x);
 
-        //     Eigen::LLT<Eigen::MatrixXd, Eigen::Upper> U = G.selfadjointView<Eigen::Upper>().llt();
+            // Eigen::LLT<Eigen::MatrixXd, Eigen::Upper> U = G.selfadjointView<Eigen::Upper>().llt();
 
-        //     Eigen::VectorXd sigma(x.rows()), y = _k(_x, x);
+            Eigen::VectorXd sigma(x.rows());
+            Eigen::MatrixXd y = _k.gram(_x, x);
 
-        //     for (size_t i = 0; i < x.rows(); i++)
-        //     sigma(i) = _k(x.row(i), x) - y.transpose() * U.solve(y);
+#pragma omp parallel for
+            for (size_t i = 0; i < x.rows(); i++)
+                sigma(i) = _k(x.row(i), x.row(i)) - y.col(i).transpose() * _g.template covariance<Eigen::LLT<Eigen::Ref<Eigen::MatrixXd>, Eigen::Lower>>().solve(y.col(i));
 
-        //     return sigma;
-        // }
+            return sigma;
+        }
 
         Eigen::VectorXd params() const
         {
@@ -156,6 +168,33 @@ namespace gp_manifold {
         }
 
     protected:
+        void setGaussian()
+        {
+            // Set zero mean and covariance matrix for the Gaussian distribution
+            Eigen::VectorXd params_gauss = Eigen::VectorXd::Zero(_y.size() * _y.size() + _y.size());
+
+            // Set gram matrix
+            params_gauss.segment(0, _x.rows() * _x.rows()) = Eigen::Map<Eigen::VectorXd>(_k.gram(_x, _x).data(), _x.rows() * _x.rows());
+
+            // Set Gaussian params
+            _g.setParams(params_gauss);
+        }
+
+        void setLikelihood(const Eigen::VectorXd& params)
+        {
+            // Set covariance function parameters (no mean optimization at the moment)
+            _k.setParams(params); // This is setting signal and noise variance as well
+
+            // Set zero mean and covariance matrix for the Gaussian distribution
+            Eigen::VectorXd params_gauss = Eigen::VectorXd::Zero(_y.size() * _y.size() + _y.size());
+
+            // Set gram matrix
+            params_gauss.segment(0, _y.size() * _y.size()) = Eigen::Map<Eigen::VectorXd>(_k.gram(_x, _x).data(), _y.size() * _y.size());
+
+            // Set Gaussian params
+            _g.setParams(params_gauss);
+        }
+
         // Lift samples to GaussianProcess
         using utils::Expansion<Params, Kernel>::_x;
 
@@ -170,7 +209,7 @@ namespace gp_manifold {
         Eigen::VectorXd _y;
 
         // Gaussian distribution
-        utils::Gaussian<Params, kernels::SquaredExpFull<Params>> _g;
+        utils::Gaussian<GaussianParams, kernels::SquaredExpFull<GaussianParams>> _g;
 
         // Optimizer
         Optimizer _opt;
