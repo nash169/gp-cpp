@@ -11,7 +11,7 @@ int main(int argc, char** argv)
 {
     constexpr int RAND_NUMS_TO_GENERATE = 100;
 
-    std::string mesh_name = "sphere";
+    std::string mesh_name = "armadillo";
     utils_cpp::FileManager io_manager;
 
     Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>(),

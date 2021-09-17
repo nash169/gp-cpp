@@ -7,7 +7,7 @@
 
 int main(int argc, char** argv)
 {
-    std::string mesh_name = "sphere";
+    std::string mesh_name = "armadillo";
     magnum_dynamics::MagnumApp app({argc, argv});
     utils_cpp::FileManager io_manager;
 
@@ -22,17 +22,20 @@ int main(int argc, char** argv)
 
     // Plot
 
-    // std::cout << ground_truth.minCoeff() << " - " << ground_truth.maxCoeff() << std::endl;
-    // app.plot(nodes, ground_truth, faces, -1.2, 1.2);
+    std::cout << ground_truth.minCoeff() << " - " << ground_truth.maxCoeff() << std::endl;
+    app.plot(nodes, ground_truth, faces, -1.2, 1.2)
+        .setTransformation(Matrix4::translation(Vector3(-30, 0, 0)));
 
     // std::cout << gp.minCoeff() << " - " << gp.maxCoeff() << std::endl;
     // app.plot(nodes, gp, faces, -1.2, 1.2);
 
     // std::cout << rgp_fem.minCoeff() << " - " << rgp_fem.maxCoeff() << std::endl;
-    // app.plot(nodes, rgp_fem, faces, -1.1, 1.1);
+    // app.plot(nodes, rgp_fem, faces, -5.5, 5.5)
+    //     .setTransformation(Matrix4::translation(Vector3(30, 0, 0)));
 
     std::cout << rgp_diffusion.minCoeff() << " - " << rgp_diffusion.maxCoeff() << std::endl;
-    app.plot(nodes, rgp_diffusion, faces, -1.2, 1.2);
+    app.plot(nodes, rgp_diffusion, faces, -3.5, 3.5)
+        .setTransformation(Matrix4::translation(Vector3(30, 0, 0)));
 
     return app.exec();
 }

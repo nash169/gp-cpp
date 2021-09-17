@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
     MPI_Comm_rank(MPI_COMM_WORLD, &myid);
 
     // Data
-    string mesh_name = "sphere",
+    string mesh_name = "armadillo",
            mesh_ext = "msh",
            mesh_string = "rsc/meshes/" + mesh_name + "." + mesh_ext;
 
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     int ser_ref_levels = 2;
     int par_ref_levels = 1;
     int order = 1;
-    int nev = 100;
+    int nev = 50;
     int seed = 75;
     const char* slepcrc_file = "";
 

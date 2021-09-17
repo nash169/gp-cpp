@@ -33,7 +33,7 @@ struct ParamsRiemann {
 
 int main(int argc, char** argv)
 {
-    std::string mesh_name = "sphere", mesh_ext = "mesh";
+    std::string mesh_name = "armadillo", mesh_ext = "mesh";
     utils_cpp::FileManager io_manager;
 
     // Load mesh nodes and indices

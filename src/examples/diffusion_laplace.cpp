@@ -13,6 +13,8 @@
 using namespace gp_manifold;
 using namespace kernel_lib;
 
+#define SIGMA -1 // -4.6052 -2.99573 -2.30259 -0.6931 (0.01 0.05 0.1 0.5)
+
 struct ParamsExp {
     struct kernel : public defaults::kernel {
         PARAM_SCALAR(double, sf, 0);
@@ -20,13 +22,13 @@ struct ParamsExp {
     };
 
     struct exp_sq : public defaults::exp_sq {
-        PARAM_SCALAR(double, l, -2.99573); // -4.6052 -2.99573 -2.30259 -0.6931 (0.01 0.05 0.1 0.5)
+        PARAM_SCALAR(double, l, SIGMA);
     };
 };
 
 int main(int argc, char** argv)
 {
-    std::string mesh_name = "sphere", mesh_ext = "msh";
+    std::string mesh_name = "armadillo", mesh_ext = "msh";
 
     // Load "sampled" nodes
     utils_cpp::FileManager io_manager;
@@ -45,7 +47,7 @@ int main(int argc, char** argv)
                     target = io_manager.setFile("rsc/truth/" + mesh_name + "_target.csv").read<Eigen::MatrixXd>();
 
     // Geometric Laplacian
-    double eps = 2 * std::pow(std::exp(-2.30259), 2);
+    double eps = 2 * std::pow(std::exp(SIGMA), 2);
     size_t num_samples = vertices.rows(), nn = 50, skip_diag = 1;
     utils::Graph graph;
 
@@ -68,7 +70,7 @@ int main(int argc, char** argv)
     // L = (D - L) / eps / 4;
 
     // Create Slepc solver
-    int nev = 100;
+    int nev = 50;
     SlepcSolver solver(argc, argv);
 
     // solver.operators(std::make_unique<PetscMatrix>(L), std::make_unique<PetscMatrix>(D)) // Set opeartors

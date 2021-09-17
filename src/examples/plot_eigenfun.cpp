@@ -7,7 +7,7 @@
 
 int main(int argc, char** argv)
 {
-    std::string mesh_name = "sphere";
+    std::string mesh_name = "armadillo";
     magnum_dynamics::MagnumApp app({argc, argv});
     utils_cpp::FileManager io_manager;
 
