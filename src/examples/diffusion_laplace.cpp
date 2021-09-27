@@ -13,7 +13,7 @@
 using namespace gp_manifold;
 using namespace kernel_lib;
 
-#define SIGMA -1 // -4.6052 -2.99573 -2.30259 -0.6931 (0.01 0.05 0.1 0.5)
+#define SIGMA -2.99573 // -4.6052 -2.99573 -2.30259 -0.6931 (0.01 0.05 0.1 0.5)
 
 struct ParamsExp {
     struct kernel : public defaults::kernel {
@@ -28,7 +28,8 @@ struct ParamsExp {
 
 int main(int argc, char** argv)
 {
-    std::string mesh_name = "armadillo", mesh_ext = "msh";
+    std::string mesh_name = (argc > 1) ? argv[1] : "sphere",
+                mesh_ext = "msh";
 
     // Load "sampled" nodes
     utils_cpp::FileManager io_manager;
@@ -70,7 +71,7 @@ int main(int argc, char** argv)
     // L = (D - L) / eps / 4;
 
     // Create Slepc solver
-    int nev = 50;
+    int nev = (argc > 2) ? std::stoi(argv[2]) : 10;
     SlepcSolver solver(argc, argv);
 
     // solver.operators(std::make_unique<PetscMatrix>(L), std::make_unique<PetscMatrix>(D)) // Set opeartors

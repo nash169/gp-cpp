@@ -7,7 +7,7 @@
 
 int main(int argc, char** argv)
 {
-    std::string mesh_name = "armadillo";
+    std::string mesh_name = (argc > 1) ? argv[1] : "sphere";
     magnum_dynamics::MagnumApp app({argc, argv});
     utils_cpp::FileManager io_manager;
 
@@ -31,13 +31,21 @@ int main(int argc, char** argv)
                     diffusion_vecs = io_manager.setFile("rsc/modes/diffusion_" + mesh_name + "_modes.000000").read<Eigen::MatrixXd>("modes", 2);
 
     // Plot eigenvector
-    int fun_to_plot = 4;
+    int fun_to_plot = (argc > 2) ? std::stoi(argv[2]) : 1;
 
-    // std::cout << fem_vecs.col(fun_to_plot).maxCoeff() << " - " << fem_vecs.col(fun_to_plot).minCoeff() << std::endl;
-    // app.plot(fem_vertices, fem_vecs.col(fun_to_plot), fem_indices, -0.06, 0.06);
+    double min = (fem_vecs.col(fun_to_plot).minCoeff() < diffusion_vecs.col(fun_to_plot).minCoeff()) ? fem_vecs.col(fun_to_plot).minCoeff() : diffusion_vecs.col(fun_to_plot).minCoeff(),
+           max = (fem_vecs.col(fun_to_plot).maxCoeff() > diffusion_vecs.col(fun_to_plot).maxCoeff()) ? fem_vecs.col(fun_to_plot).maxCoeff() : diffusion_vecs.col(fun_to_plot).maxCoeff();
 
-    std::cout << diffusion_vecs.col(fun_to_plot).maxCoeff() << " - " << diffusion_vecs.col(fun_to_plot).minCoeff() << std::endl;
-    app.plot(diffusion_vertices, diffusion_vecs.col(fun_to_plot), diffusion_indices, -0.055, 0.055);
+    min = min - min * 0.01;
+    max = max + max * 0.01;
+
+    std::cout << min << " - " << max << std::endl;
+
+    app.plot(fem_vertices, fem_vecs.col(fun_to_plot), fem_indices, min, max)
+        .setTransformation(Matrix4::translation({0.0f, 5.0f, 0.0f}));
+
+    app.plot(diffusion_vertices, diffusion_vecs.col(fun_to_plot), diffusion_indices, min, max)
+        .setTransformation(Matrix4::translation({0.0f, -5.0f, 0.0f}));
 
     return app.exec();
 }

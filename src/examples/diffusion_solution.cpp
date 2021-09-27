@@ -36,7 +36,8 @@ struct ParamsRiemann {
 
 int main(int argc, char** argv)
 {
-    std::string mesh_name = "armadillo", mesh_ext = "msh";
+    std::string mesh_name = (argc > 1) ? argv[1] : "sphere",
+                mesh_ext = "msh";
 
     // Load "sampled" nodes
     utils_cpp::FileManager io_manager;
@@ -66,7 +67,7 @@ int main(int argc, char** argv)
     RGP_t rgp;
 
     // Set kernel eigen pairs
-    int num_modes = 100;
+    int num_modes = (argc > 2) ? std::stoi(argv[2]) : 10;
 
     for (size_t i = 1; i < num_modes; i++) {
         // Create eigenfunction

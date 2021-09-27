@@ -7,7 +7,6 @@ import trimesh
 import networkx as nx
 import os
 
-
 mesh = trimesh.load_mesh(sys.argv[1])
 mesh_name = os.path.splitext(os.path.basename(sys.argv[1]))[0]
 

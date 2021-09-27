@@ -3,15 +3,15 @@ Gaussian Processes on Manifolds
 
 ## Run
 - Generate ground truth         -> `python scripts/ground_truth.py path/to/mesh` (use stl file)
-- Generate samples              -> `./build/src/examples/generate_target` (set mesh name within the exe)
-- FEM eigenfunction             -> `mpirun -np 1 ./build/src/examples/fem_laplace` (set mesh name within the exe)
-- Diffusion maps eigenfunction  -> `mpirun -np 1 ./build/src/examples/diffusion_laplace` (set mesh name within the exe)
-- Ambient solution              -> `./build/src/examples/ambient_solution` (set mesh name within the exe)
-- FEM solution                  -> `./build/src/examples/fem_solution` (set mesh name within the exe)
-- Diffusion maps solution       -> `./build/src/examples/diffusion_solution` (set mesh name within the exe)
-- Plot eigenfunction            -> `./build/src/examples/plot_eigenfun` (set mesh name within the exe)
-- Plot solution                 -> `./build/src/examples/plot_solution` (set mesh name within the exe)
-- Plot embedding                -> `python scripts/plot_embedding.py` (set mesh name within the exe)
+- Generate samples              -> `./build/src/examples/generate_target <name>`
+- FEM eigenfunction             -> `mpirun -np 1 ./build/src/examples/fem_laplace <name> <num-modes>`
+- Diffusion maps eigenfunction  -> `mpirun -np 1 ./build/src/examples/diffusion_laplace <name> <num-modes>`
+- Ambient solution              -> `./build/src/examples/ambient_solution <name>`
+- FEM solution                  -> `./build/src/examples/fem_solution <name> <num-modes>`
+- Diffusion maps solution       -> `./build/src/examples/diffusion_solution <name> <num-modes>`
+- Plot eigenfunction            -> `./build/src/examples/plot_eigenfun <name> <fun-num>`
+- Plot solution                 -> `./build/src/examples/plot_solution <name>`
+- Plot embedding                -> `python scripts/plot_embedding.py <name> <num-modes>`
 
 ## ToDo
 - Add sigma method to Gaussian Process

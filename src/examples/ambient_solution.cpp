@@ -24,7 +24,7 @@ struct ParamsExp {
 
 int main(int argc, char** argv)
 {
-    std::string mesh_name = "armadillo";
+    std::string mesh_name = (argc > 1) ? argv[1] : "sphere";
     utils_cpp::FileManager io_manager;
 
     // Load ground truth, target and relative nodes

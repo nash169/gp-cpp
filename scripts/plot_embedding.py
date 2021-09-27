@@ -9,8 +9,8 @@ from matplotlib import cm
 from io_utils import get_data
 
 # Data
-mesh_name = "sphere"
-num_modes = 5
+mesh_name = sys.argv[1] if len(sys.argv) > 1 else "sphere"
+num_modes = int(sys.argv[2]) if len(sys.argv) > 2 else 5
 
 # Nodes
 nodes = np.loadtxt("rsc/truth/"+mesh_name+"_vertices.csv")
