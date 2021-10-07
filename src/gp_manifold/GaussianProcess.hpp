@@ -201,7 +201,7 @@ namespace gp_manifold {
         // Lift kernel to GaussianProcess
         using utils::Expansion<Params, Kernel>::_k;
 
-        // Make protected setWeights method
+        // Lift and make protected setWeights method
         using utils::Expansion<Params, Kernel>::setWeights;
         // Logic behind using: https://stackoverflow.com/questions/20790932/what-is-the-logic-behind-the-using-keyword-in-c
 
