@@ -2,7 +2,7 @@
 Gaussian Processes on Manifolds
 
 ## Run
-- Generate ground truth         -> `python scripts/ground_truth.py path/to/mesh` (use stl file)
+- Generate ground truth         -> `python scripts/ground_truth.py <name>`
 - Generate samples              -> `./build/src/examples/generate_target <name>`
 - FEM eigenfunction             -> `mpirun -np 1 ./build/src/examples/fem_laplace <name> <num-modes>`
 - Diffusion maps eigenfunction  -> `mpirun -np 1 ./build/src/examples/diffusion_laplace <name> <num-modes>`

@@ -7,8 +7,8 @@ import trimesh
 import networkx as nx
 import os
 
-mesh = trimesh.load_mesh(sys.argv[1])
-mesh_name = os.path.splitext(os.path.basename(sys.argv[1]))[0]
+name = sys.argv[1] if len(sys.argv) > 1 else "sphere"
+mesh = trimesh.load_mesh("rsc/meshes/" + name + ".stl")
 
 graph = trimesh.graph.vertex_adjacency_graph(mesh)
 
@@ -22,8 +22,8 @@ period = 2*np.pi / 0.3 * 2
 for i in range(N):
     ground_truth[i] = np.sin(0.2*geodesics.get(i))
 
-np.savetxt("rsc/truth/" + mesh_name + "_truth.csv", ground_truth)
-np.savetxt("rsc/truth/" + mesh_name + "_vertices.csv", mesh.vertices)
-np.savetxt("rsc/truth/" + mesh_name + "_faces.csv", mesh.faces)
+np.savetxt("rsc/truth/" + name + "_truth.csv", ground_truth)
+np.savetxt("rsc/truth/" + name + "_vertices.csv", mesh.vertices)
+np.savetxt("rsc/truth/" + name + "_faces.csv", mesh.faces)
 
 # mesh.show()
