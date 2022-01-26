@@ -5,12 +5,14 @@
 #include <type_traits>
 
 #include <kernel_lib/Kernel.hpp>
-#include <utils_cpp/UtilsCpp.hpp>
+#include <utils_cpp/DerivativeChecker.hpp>
 
 #include "gp_manifold/optimization/AbstractOptimizer.hpp"
 
+using namespace kernel_lib;
+using namespace utils_cpp;
+
 namespace gp_manifold {
-    using namespace kernel_lib;
 
     /* Defaults parameters for the normal distribution (those cannot be initialize in the main) */
     struct GaussianParams {
@@ -119,7 +121,7 @@ namespace gp_manifold {
         {
             std::cout << "Number of params: " << this->sizeParams() << std::endl;
 
-            utils_cpp::DerivativeChecker checker(this->sizeParams());
+            DerivativeChecker checker(this->sizeParams());
 
             return checker.checkGradient(std::bind(&GaussianProcess<Params, Kernel, Optimizer>::likelihood, this, std::placeholders::_1),
                 std::bind(&GaussianProcess<Params, Kernel, Optimizer>::likelihoodGrad, this, std::placeholders::_1));

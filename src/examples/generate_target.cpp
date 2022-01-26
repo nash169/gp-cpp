@@ -2,10 +2,9 @@
 #include <iostream>
 #include <random>
 #include <sstream>
-#include <utils_cpp/UtilsCpp.hpp>
+#include <utils_cpp/FileManager.hpp>
 
-constexpr int MIN = 0;
-constexpr int MAX = 1595;
+using namespace utils_cpp;
 
 int main(int argc, char** argv)
 {
@@ -13,7 +12,7 @@ int main(int argc, char** argv)
 
     std::string mesh_name = (argc > 1) ? argv[1] : "sphere";
 
-    utils_cpp::FileManager io_manager;
+    FileManager io_manager;
 
     Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>(),
                     reference(RAND_NUMS_TO_GENERATE, nodes.cols());

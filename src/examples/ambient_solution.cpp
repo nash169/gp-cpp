@@ -2,12 +2,13 @@
 #include <sstream>
 
 #include <gp_manifold/GaussianProcess.hpp>
-#include <utils_cpp/UtilsCpp.hpp>
+#include <utils_cpp/FileManager.hpp>
 
 #include <Eigen/Dense>
 
 using namespace gp_manifold;
 using namespace kernel_lib;
+using namespace utils_cpp;
 
 struct ParamsExp {
     struct kernel : public defaults::kernel {
@@ -23,7 +24,7 @@ struct ParamsExp {
 int main(int argc, char** argv)
 {
     std::string mesh_name = (argc > 1) ? argv[1] : "sphere";
-    utils_cpp::FileManager io_manager;
+    FileManager io_manager;
 
     // Load ground truth, target and relative nodes
     Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>(),

@@ -2,12 +2,13 @@
 
 #include <kernel_lib/Kernel.hpp>
 
-#include <utils_cpp/UtilsCpp.hpp>
+#include <utils_cpp/FileManager.hpp>
 
 #include <gp_manifold/SlepcSolver.hpp>
 
 using namespace kernel_lib;
 using namespace gp_manifold;
+using namespace utils_cpp;
 
 struct Params {
     struct kernel : public defaults::kernel {
@@ -181,7 +182,7 @@ int main(int argc, char** argv)
     }
 
     // Solution
-    utils_cpp::FileManager io_manager;
+    FileManager io_manager;
     io_manager.setFile("rsc/solutions/kernel_eval.csv");
     io_manager.write("SAMPLES", samples, "FUNCTION", fun, "EIGVEC", vecs);
 

@@ -4,10 +4,11 @@
 #include <gp_manifold/GaussianProcess.hpp>
 #include <gp_manifold/SlepcSolver.hpp>
 
-#include <utils_cpp/UtilsCpp.hpp>
+#include <utils_cpp/FileManager.hpp>
 
 using namespace gp_manifold;
 using namespace kernel_lib;
+using namespace utils_cpp;
 
 struct ParamsExp {
     struct kernel : public defaults::kernel {
@@ -37,7 +38,7 @@ int main(int argc, char** argv)
                 mesh_ext = "msh";
 
     // Load "sampled" nodes
-    utils_cpp::FileManager io_manager;
+    FileManager io_manager;
     Eigen::MatrixXd vertices = io_manager.setFile("rsc/meshes/" + mesh_name + "." + mesh_ext).read<Eigen::MatrixXd>("$Nodes", 2, "$EndNodes"),
                     indices = io_manager.read<Eigen::MatrixXd>("$Elements", 2, "$EndElements").array() - 1;
 

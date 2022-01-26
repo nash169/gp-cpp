@@ -3,13 +3,15 @@
 #include <sstream>
 
 #include <science_graphics/ScienceGraphics.hpp>
-#include <utils_cpp/UtilsCpp.hpp>
+#include <utils_cpp/FileManager.hpp>
+
+using namespace utils_cpp;
 
 int main(int argc, char** argv)
 {
     std::string mesh_name = (argc > 1) ? argv[1] : "sphere";
     science_graphics::ScienceGraphics app({argc, argv});
-    utils_cpp::FileManager io_manager;
+    FileManager io_manager;
 
     // Load ground truth, target and relative nodes
     Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>(),

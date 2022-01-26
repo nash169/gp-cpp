@@ -2,10 +2,11 @@
 #include <sstream>
 
 #include <gp_manifold/GaussianProcess.hpp>
-#include <utils_cpp/UtilsCpp.hpp>
+#include <utils_cpp/FileManager.hpp>
 
 using namespace gp_manifold;
 using namespace kernel_lib;
+using namespace utils_cpp;
 
 struct ParamsExp {
     struct kernel : public defaults::kernel {
@@ -33,7 +34,7 @@ int main(int argc, char** argv)
 {
     std::string mesh_name = (argc > 1) ? argv[1] : "sphere",
                 mesh_ext = "mesh";
-    utils_cpp::FileManager io_manager;
+    FileManager io_manager;
 
     // Load mesh nodes and indices
     Eigen::MatrixXd vertices = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_mesh.000000").read<Eigen::MatrixXd>("vertices", 3),

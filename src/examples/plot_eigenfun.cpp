@@ -3,13 +3,15 @@
 #include <sstream>
 
 #include <science_graphics/ScienceGraphics.hpp>
-#include <utils_cpp/UtilsCpp.hpp>
+#include <utils_cpp/FileManager.hpp>
+
+using namespace utils_cpp;
 
 int main(int argc, char** argv)
 {
     std::string mesh_name = (argc > 1) ? argv[1] : "sphere";
     science_graphics::ScienceGraphics app({argc, argv});
-    utils_cpp::FileManager io_manager;
+    FileManager io_manager;
 
     // Load mesh
     Eigen::MatrixXd fem_vertices = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_mesh.000000").read<Eigen::MatrixXd>("vertices", 3),

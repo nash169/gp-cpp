@@ -2,10 +2,11 @@
 #include <fstream>
 #include <iostream>
 #include <mfem.hpp>
-#include <utils_cpp/UtilsCpp.hpp>
+#include <utils_cpp/FileManager.hpp>
 
 using namespace std;
 using namespace mfem;
+using namespace utils_cpp;
 
 int main(int argc, char* argv[])
 {
@@ -141,7 +142,7 @@ int main(int argc, char* argv[])
     }
 
     // Save eigenvalues
-    utils_cpp::FileManager io_manager;
+    FileManager io_manager;
     io_manager.setFile("rsc/modes/fem_" + mesh_name + "_eigs.000000").write("eigs", eigs);
 
     Vector temp(fespace->GetTrueVSize());

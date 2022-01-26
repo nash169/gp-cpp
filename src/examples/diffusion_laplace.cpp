@@ -2,15 +2,18 @@
 #include <sstream>
 #include <string>
 
-#include <gp_manifold/GaussianProcess.hpp>
 #include <gp_manifold/SlepcSolver.hpp>
-
-#include <utils_cpp/UtilsCpp.hpp>
+#include <kernel_lib/Kernel.hpp>
+#include <utils_cpp/FileManager.hpp>
 
 using namespace gp_manifold;
 using namespace kernel_lib;
+using namespace utils_cpp;
 
-#define SIGMA -2.99573 // -4.6052 -2.99573 -2.30259 -0.6931 (0.01 0.05 0.1 0.5)
+// magnitude of the eigenvalues related to the curvature in the different direction of the embedding
+// sphere -> -2.99573
+// ellipse -> -4.6052
+#define SIGMA -4.6052 // -4.6052 -2.99573 -2.30259 -0.6931 (0.01 0.05 0.1 0.5)
 
 struct ParamsExp {
     struct kernel : public defaults::kernel {
@@ -29,7 +32,7 @@ int main(int argc, char** argv)
                 mesh_ext = "msh";
 
     // Load "sampled" nodes
-    utils_cpp::FileManager io_manager;
+    FileManager io_manager;
     Eigen::MatrixXd vertices = io_manager.setFile("rsc/meshes/" + mesh_name + "." + mesh_ext).read<Eigen::MatrixXd>("$Nodes", 2, "$EndNodes"),
                     indices = io_manager.read<Eigen::MatrixXd>("$Elements", 2, "$EndElements").array() - 1;
 
@@ -73,7 +76,7 @@ int main(int argc, char** argv)
 
     // solver.operators(std::make_unique<PetscMatrix>(L), std::make_unique<PetscMatrix>(D)) // Set opeartors
     solver.operators(std::make_unique<PetscMatrix>(L)) // Set opeartors
-                                                       // .problem(EPS_NHEP) // Set problem type
+        // .problem(EPS_NHEP) // Set problem type
         .target(0.0) // target eigenvalue
         .spectrum(EPS_TARGET_REAL) // Select smallest eigenvalues
         .modes(nev) // Number of requested eigenvalues
