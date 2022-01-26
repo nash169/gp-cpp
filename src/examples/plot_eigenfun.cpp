@@ -2,13 +2,13 @@
 #include <iostream>
 #include <sstream>
 
-#include <magnum_dynamics/MagnumApp.hpp>
+#include <science_graphics/ScienceGraphics.hpp>
 #include <utils_cpp/UtilsCpp.hpp>
 
 int main(int argc, char** argv)
 {
     std::string mesh_name = (argc > 1) ? argv[1] : "sphere";
-    magnum_dynamics::MagnumApp app({argc, argv});
+    science_graphics::ScienceGraphics app({argc, argv});
     utils_cpp::FileManager io_manager;
 
     // Load mesh
@@ -41,10 +41,10 @@ int main(int argc, char** argv)
 
     std::cout << min << " - " << max << std::endl;
 
-    app.plot(fem_vertices, fem_vecs.col(fun_to_plot), fem_indices, min, max)
+    app.surf(fem_vertices, fem_vecs.col(fun_to_plot), fem_indices, min, max)
         .setTransformation(Matrix4::translation({0.0f, 5.0f, 0.0f}));
 
-    app.plot(diffusion_vertices, diffusion_vecs.col(fun_to_plot), diffusion_indices, min, max)
+    app.surf(diffusion_vertices, diffusion_vecs.col(fun_to_plot), diffusion_indices, min, max)
         .setTransformation(Matrix4::translation({0.0f, -5.0f, 0.0f}));
 
     return app.exec();

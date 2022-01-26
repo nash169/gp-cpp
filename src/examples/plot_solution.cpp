@@ -2,13 +2,13 @@
 #include <iostream>
 #include <sstream>
 
-#include <magnum_dynamics/MagnumApp.hpp>
+#include <science_graphics/ScienceGraphics.hpp>
 #include <utils_cpp/UtilsCpp.hpp>
 
 int main(int argc, char** argv)
 {
     std::string mesh_name = (argc > 1) ? argv[1] : "sphere";
-    magnum_dynamics::MagnumApp app({argc, argv});
+    science_graphics::ScienceGraphics app({argc, argv});
     utils_cpp::FileManager io_manager;
 
     // Load ground truth, target and relative nodes
@@ -33,16 +33,16 @@ int main(int argc, char** argv)
     std::cout << rgp_fem.minCoeff() << " - " << rgp_fem.maxCoeff() << std::endl;
     std::cout << rgp_diffusion.minCoeff() << " - " << rgp_diffusion.maxCoeff() << std::endl;
 
-    app.plot(nodes, ground_truth, faces, min, max)
+    app.surf(nodes, ground_truth, faces, min, max)
         .setTransformation(Matrix4::translation(Vector3(0, 0, 2)));
 
-    app.plot(nodes, gp, faces, min, max)
+    app.surf(nodes, gp, faces, min, max)
         .setTransformation(Matrix4::translation(Vector3(0, 0, -2)));
 
-    app.plot(nodes, rgp_fem, faces, min, max)
+    app.surf(nodes, rgp_fem, faces, min, max)
         .setTransformation(Matrix4::translation(Vector3(0, -10, -2)));
 
-    app.plot(nodes, rgp_diffusion, faces, min, max)
+    app.surf(nodes, rgp_diffusion, faces, min, max)
         .setTransformation(Matrix4::translation(Vector3(0, 10, -2)));
 
     return app.exec();

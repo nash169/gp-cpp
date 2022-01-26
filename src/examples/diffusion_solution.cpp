@@ -1,12 +1,9 @@
 #include <iostream>
 #include <sstream>
 
-#include <Eigen/Core>
-
 #include <gp_manifold/GaussianProcess.hpp>
 #include <gp_manifold/SlepcSolver.hpp>
 
-#include <magnum_dynamics/MagnumApp.hpp>
 #include <utils_cpp/UtilsCpp.hpp>
 
 using namespace gp_manifold;

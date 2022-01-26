@@ -17,7 +17,7 @@ def build(bld):
     sources = [f[len(bld.path.abspath()) + 1:] for f in sources]
 
     # External required libraries for the examples
-    # example_required = {"laplace_problem.cpp": ["UTILSCPP", "MAGNUMDYNAMICS"]}
+    # example_required = {"laplace_problem.cpp": ["UTILSCPP", "SCIENCEGRAPHICS"]}
     example_required = {}
 
     # External optional libraries for the examples

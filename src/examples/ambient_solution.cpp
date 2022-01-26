@@ -1,9 +1,7 @@
 #include <iostream>
 #include <sstream>
 
-// #include <Eigen/Core>
 #include <gp_manifold/GaussianProcess.hpp>
-#include <magnum_dynamics/MagnumApp.hpp>
 #include <utils_cpp/UtilsCpp.hpp>
 
 #include <Eigen/Dense>

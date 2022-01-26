@@ -2,12 +2,9 @@
 #include <sstream>
 #include <string>
 
-#include <Eigen/Core>
-
 #include <gp_manifold/GaussianProcess.hpp>
 #include <gp_manifold/SlepcSolver.hpp>
 
-#include <magnum_dynamics/MagnumApp.hpp>
 #include <utils_cpp/UtilsCpp.hpp>
 
 using namespace gp_manifold;
@@ -76,7 +73,7 @@ int main(int argc, char** argv)
 
     // solver.operators(std::make_unique<PetscMatrix>(L), std::make_unique<PetscMatrix>(D)) // Set opeartors
     solver.operators(std::make_unique<PetscMatrix>(L)) // Set opeartors
-        // .problem(EPS_NHEP) // Set problem type
+                                                       // .problem(EPS_NHEP) // Set problem type
         .target(0.0) // target eigenvalue
         .spectrum(EPS_TARGET_REAL) // Select smallest eigenvalues
         .modes(nev) // Number of requested eigenvalues
