@@ -49,6 +49,11 @@ Surface(7) = {7};
 Curve Loop(8) = {-7, 3, -11};
 Surface(8) = {8};
 
+Surface Loop(29) = {1,2,3,4,5,6,7,8};
+Volume(30) = {29};
+Physical Surface(1) = {1,2,3,4,5,6,7,8};
+Physical Volume(2) = 30;
+
 // Generate 2D mesh
 Mesh 2;
 Mesh.MshFileVersion = 2.2;
