@@ -1,6 +1,3 @@
-#include <IpIpoptApplication.hpp>
-#include <IpSolveStatistics.hpp>
-
 #include <gp_manifold/optimization/IpoptOptimizer.hpp>
 
 #include <iostream>
