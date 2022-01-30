@@ -3,9 +3,12 @@
 
 #include "gp_manifold/optimization/AbstractOptimizer.hpp"
 
+#define HAVE_CSTDDEF
+#include <IpTNLP.hpp>
+#undef HAVE_CSTDDEF
+
 #include <IpIpoptApplication.hpp>
 #include <IpSolveStatistics.hpp>
-#include <IpTNLP.hpp>
 
 #include <cassert>
 

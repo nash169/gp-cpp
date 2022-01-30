@@ -4,11 +4,11 @@
 
 #include <gp_manifold/SlepcSolver.hpp>
 #include <kernel_lib/Kernel.hpp>
-#include <utils_cpp/FileManager.hpp>
+#include <utils_lib/FileManager.hpp>
 
 using namespace gp_manifold;
 using namespace kernel_lib;
-using namespace utils_cpp;
+using namespace utils_lib;
 
 // magnitude of the eigenvalues related to the curvature in the different direction of the embedding
 // sphere -> -2.99573
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 
     // solver.operators(std::make_unique<PetscMatrix>(L), std::make_unique<PetscMatrix>(D)) // Set opeartors
     solver.operators(std::make_unique<PetscMatrix>(L)) // Set opeartors
-        // .problem(EPS_NHEP) // Set problem type
+                                                       // .problem(EPS_NHEP) // Set problem type
         .target(0.0) // target eigenvalue
         .spectrum(EPS_TARGET_REAL) // Select smallest eigenvalues
         .modes(nev) // Number of requested eigenvalues

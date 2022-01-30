@@ -2,9 +2,9 @@
 #include <iostream>
 #include <random>
 #include <sstream>
-#include <utils_cpp/FileManager.hpp>
+#include <utils_lib/FileManager.hpp>
 
-using namespace utils_cpp;
+using namespace utils_lib;
 
 int main(int argc, char** argv)
 {

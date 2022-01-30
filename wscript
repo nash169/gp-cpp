@@ -13,8 +13,8 @@ blddir = "build"
 
 # Tools' name and directory
 tools = {
-    "utils_cpp": "",
-    "magnum_dynamics": "",
+    "utilslib": "",
+    "graphicslib": "",
     "kernel_lib": "",
 }
 

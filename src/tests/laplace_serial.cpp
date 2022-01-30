@@ -3,7 +3,7 @@
 
 #include <mfem.hpp>
 
-#include <utils_cpp/UtilsCpp.hpp>
+#include <utils_lib/FileManager.hpp>
 
 using namespace std;
 using namespace mfem;
@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
 
     Eigen::VectorXd eigenvalues = spectra.GetEigenvalues(nev);
 
-    // utils_cpp::FileManager io_manager;
+    // utils_lib::FileManager io_manager;
     // Eigen::IOFormat precision(10);
     // io_manager.setFile("rsc/modes/sphere_eigs").write(eigenvalues.format(precision));
 

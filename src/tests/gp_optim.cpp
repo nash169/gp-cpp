@@ -3,7 +3,7 @@
 #include <Eigen/Core>
 #include <gp_manifold/GaussianProcess.hpp>
 #include <gp_manifold/optimization/IpoptOptimizer.hpp>
-#include <utils_cpp/UtilsCpp.hpp>
+#include <utils_lib/FileManager.hpp>
 
 using namespace gp_manifold;
 using namespace kernel_lib;
@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     gp.setSamples(sample_x).setTarget(sample_y).update();
 
     // Save GP solution
-    utils_cpp::FileManager io_manager;
+    utils_lib::FileManager io_manager;
     io_manager.setFile("rsc/solutions/1d_gp.csv").write("X", x, "Y", y, "sample_x", sample_x, "sample_y", sample_y, "GP", gp.multiEval(x));
 
     // gp.check();

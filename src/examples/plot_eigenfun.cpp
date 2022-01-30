@@ -2,15 +2,15 @@
 #include <iostream>
 #include <sstream>
 
-#include <science_graphics/ScienceGraphics.hpp>
-#include <utils_cpp/FileManager.hpp>
+#include <graphics_lib/Graphics.hpp>
+#include <utils_lib/FileManager.hpp>
 
-using namespace utils_cpp;
+using namespace utils_lib;
 
 int main(int argc, char** argv)
 {
     std::string mesh_name = (argc > 1) ? argv[1] : "sphere";
-    science_graphics::ScienceGraphics app({argc, argv});
+    graphics_lib::Graphics app({argc, argv});
     FileManager io_manager;
 
     // Load mesh

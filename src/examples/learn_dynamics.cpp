@@ -2,13 +2,13 @@
 
 #include <kernel_lib/Kernel.hpp>
 
-#include <utils_cpp/FileManager.hpp>
+#include <utils_lib/FileManager.hpp>
 
 #include <gp_manifold/SlepcSolver.hpp>
 
 using namespace kernel_lib;
 using namespace gp_manifold;
-using namespace utils_cpp;
+using namespace utils_lib;
 
 struct Params {
     struct kernel : public defaults::kernel {

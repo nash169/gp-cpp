@@ -4,11 +4,11 @@
 #include <gp_manifold/GaussianProcess.hpp>
 #include <gp_manifold/SlepcSolver.hpp>
 
-#include <utils_cpp/FileManager.hpp>
+#include <utils_lib/FileManager.hpp>
 
 using namespace gp_manifold;
 using namespace kernel_lib;
-using namespace utils_cpp;
+using namespace utils_lib;
 
 struct ParamsExp {
     struct kernel : public defaults::kernel {

@@ -5,12 +5,12 @@
 #include <type_traits>
 
 #include <kernel_lib/Kernel.hpp>
-#include <utils_cpp/DerivativeChecker.hpp>
+#include <utils_lib/DerivativeChecker.hpp>
 
 #include "gp_manifold/optimization/AbstractOptimizer.hpp"
 
 using namespace kernel_lib;
-using namespace utils_cpp;
+using namespace utils_lib;
 
 namespace gp_manifold {
 
