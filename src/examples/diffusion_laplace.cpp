@@ -13,7 +13,7 @@ using namespace utils_lib;
 // magnitude of the eigenvalues related to the curvature in the different direction of the embedding
 // sphere -> -2.99573
 // ellipse -> -4.6052
-#define SIGMA -4.6052 // -4.6052 -2.99573 -2.30259 -0.6931 (0.01 0.05 0.1 0.5)
+#define SIGMA -2.99573 // -4.6052 -2.99573 -2.30259 -0.6931 (0.01 0.05 0.1 0.5)
 
 struct ParamsExp {
     struct kernel : public defaults::kernel {
@@ -33,19 +33,12 @@ int main(int argc, char** argv)
 
     // Load "sampled" nodes
     FileManager io_manager;
-    Eigen::MatrixXd vertices = io_manager.setFile("rsc/meshes/" + mesh_name + "." + mesh_ext).read<Eigen::MatrixXd>("$Nodes", 2, "$EndNodes"),
-                    indices = io_manager.read<Eigen::MatrixXd>("$Elements", 2, "$EndElements").array() - 1;
+    Eigen::MatrixXd vertices = io_manager.setFile("rsc/meshes/" + mesh_name + "." + mesh_ext).read<Eigen::MatrixXd>("$Nodes", 2, "$EndNodes");
 
     vertices.block(0, 0, vertices.rows(), 3) = vertices.block(0, 1, vertices.rows(), 3);
     vertices.conservativeResize(vertices.rows(), 3);
 
-    // Load ground truth, target and relative nodes
-    Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>(),
-                    faces = io_manager.setFile("rsc/truth/" + mesh_name + "_faces.csv").read<Eigen::MatrixXd>(),
-                    reference = io_manager.setFile("rsc/truth/" + mesh_name + "_reference.csv").read<Eigen::MatrixXd>();
-
-    Eigen::VectorXd ground_truth = io_manager.setFile("rsc/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>(),
-                    target = io_manager.setFile("rsc/truth/" + mesh_name + "_target.csv").read<Eigen::MatrixXd>();
+    // io_manager.setFile("rsc/samples.csv").write(vertices);
 
     // Geometric Laplacian
     double eps = 2 * std::pow(std::exp(SIGMA), 2);
@@ -69,6 +62,8 @@ int main(int argc, char** argv)
 
     L = (Eigen::MatrixXd::Identity(num_samples, num_samples) - D * L) / eps / 4;
     // L = (D - L) / eps / 4;
+
+    // io_manager.setFile("rsc/laplacian.csv").write(Eigen::MatrixXd(L));
 
     // Create Slepc solver
     int nev = (argc > 2) ? std::stoi(argv[2]) : 10;
