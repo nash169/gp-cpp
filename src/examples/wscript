@@ -18,7 +18,7 @@ def build(bld):
 
     # External required libraries for the examples
     # example_required = {"laplace_problem.cpp": ["UTILSCPP", "SCIENCEGRAPHICS"]}
-    example_required = {}
+    example_required = {"tangent_space.cpp": ["PYTHON"]}
 
     # External optional libraries for the examples
     example_optional = {}
