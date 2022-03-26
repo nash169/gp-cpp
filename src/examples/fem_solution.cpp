@@ -1,4 +1,5 @@
 #include <iostream>
+#include <random>
 #include <sstream>
 
 #include <gp_manifold/GaussianProcess.hpp>
@@ -36,21 +37,14 @@ int main(int argc, char** argv)
                 mesh_ext = "mesh";
     FileManager io_manager;
 
-    // Load mesh nodes and indices
+    // Load mesh nodes, eigenvectors and eigenvalues for Riemann kernel construction
     Eigen::MatrixXd vertices = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_mesh.000000").read<Eigen::MatrixXd>("vertices", 3),
-                    indices = io_manager.read<Eigen::MatrixXd>("elements", 2);
-
-    // Load eigenvalues & eigenvectors
+                    eigenvectors = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_modes.000000").read<Eigen::MatrixXd>("modes", 2);
     Eigen::VectorXd eigenvalues = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_eigs.000000").read<Eigen::MatrixXd>("eigs", 2);
-    Eigen::MatrixXd eigenvectors = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_modes.000000").read<Eigen::MatrixXd>("modes", 2);
 
-    // Load ground truth, target and relative nodes
-    Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>(),
-                    faces = io_manager.setFile("rsc/truth/" + mesh_name + "_faces.csv").read<Eigen::MatrixXd>(),
-                    reference = io_manager.setFile("rsc/truth/" + mesh_name + "_reference.csv").read<Eigen::MatrixXd>();
-
-    Eigen::VectorXd ground_truth = io_manager.setFile("rsc/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>(),
-                    target = io_manager.setFile("rsc/truth/" + mesh_name + "_target.csv").read<Eigen::MatrixXd>();
+    // Load ground truth and relative nodes for testing GPR model
+    Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>();
+    Eigen::VectorXd ground_truth = io_manager.setFile("rsc/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>();
 
     // Riemannian Gaussian Process
     using Kernel_t = kernels::SquaredExp<ParamsExp>;
@@ -66,21 +60,52 @@ int main(int argc, char** argv)
         // Create eigenfunction
         Expansion_t f;
 
-        // Set manifold sampled points and weights
+        // Set manifold sampled points and weights (eigenfunction)
         f.setSamples(vertices).setWeights(eigenvectors.col(i));
 
         // Add eigen-pair to Riemann kernel
         rgp.kernel().addPair(eigenvalues(i), f);
     }
 
-    // Set training point and target
-    rgp.setSamples(reference).setTarget(target).update();
+    constexpr size_t NUM_RUN = 1;
+    constexpr int RAND_NUMS_TO_GENERATE[] = {100};
 
-    // Evaluation of the GP on all the mesh points
-    Eigen::VectorXd rgp_sol = rgp.multiEval2(nodes);
+    Eigen::VectorXd rgp_sol(nodes.rows());
+    Eigen::MatrixXd mse = Eigen::MatrixXd::Zero(NUM_RUN, sizeof(RAND_NUMS_TO_GENERATE) / sizeof(RAND_NUMS_TO_GENERATE[0]));
+
+    for (size_t i = 0; i < sizeof(RAND_NUMS_TO_GENERATE) / sizeof(RAND_NUMS_TO_GENERATE[0]); i++) {
+        for (size_t j = 0; j < NUM_RUN; j++) {
+            std::cout << RAND_NUMS_TO_GENERATE[i] << " points - trial " << j + 1 << std::endl;
+
+            // Create test set
+            Eigen::MatrixXd reference(RAND_NUMS_TO_GENERATE[i], nodes.cols());
+            Eigen::VectorXd target(RAND_NUMS_TO_GENERATE[i]);
+
+            std::random_device rd;
+            std::default_random_engine eng(rd());
+            std::uniform_int_distribution<int> distr(0, nodes.rows() - 1);
+
+            for (size_t k = 0; k < RAND_NUMS_TO_GENERATE[i]; k++) {
+                int index = distr(eng);
+                reference.row(k) = nodes.row(index);
+                target(k) = ground_truth(index);
+            }
+
+            // Set training point and target
+            rgp.setSamples(reference).setTarget(target).update();
+
+            // Evaluation of the GP on all the mesh points
+            rgp_sol = rgp.multiEval2(nodes);
+
+            // record mse
+            mse(j, i) = (ground_truth - rgp_sol).array().pow(2).sum() / nodes.rows();
+        }
+    }
 
     // Save GP solution
-    io_manager.setFile("rsc/solutions/fem_" + mesh_name + "_rgp.csv").write(rgp_sol);
+    io_manager
+        .setFile("rsc/solutions/fem_" + mesh_name + "_rgp.csv")
+        .write("mse", mse, "sol", rgp_sol);
 
     return 0;
 }
