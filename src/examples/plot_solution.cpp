@@ -21,11 +21,11 @@ int main(int argc, char** argv)
     if (type.compare("truth") == 0)
         sol = io_manager.setFile("rsc/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>();
     else if (type.compare("ambient") == 0)
-        sol = io_manager.setFile("rsc/solutions/ambient_" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>();
+        sol = io_manager.setFile("rsc/solutions/ambient_" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>("sol", 2);
     else if (type.compare("fem") == 0)
-        sol = io_manager.setFile("rsc/solutions/fem_" + mesh_name + "_rgp.csv").read<Eigen::MatrixXd>("sol", 2);
+        sol = io_manager.setFile("rsc/solutions/fem_" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>("sol", 2);
     else if (type.compare("diffusion") == 0)
-        sol = io_manager.setFile("rsc/solutions/diffusion_" + mesh_name + "_rgp.csv").read<Eigen::MatrixXd>();
+        sol = io_manager.setFile("rsc/solutions/diffusion_" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>("sol", 2);
 
     // Set min and max value for coloring
     double min = sol.minCoeff() - sol.minCoeff() * 0.05,

@@ -67,10 +67,10 @@ int main(int argc, char** argv)
         rgp.kernel().addPair(eigenvalues(i), f);
     }
 
-    constexpr size_t NUM_RUN = 1;
-    constexpr int RAND_NUMS_TO_GENERATE[] = {100};
+    constexpr size_t NUM_RUN = 10;
+    constexpr int RAND_NUMS_TO_GENERATE[] = {25, 50, 75, 100, 125, 150};
 
-    Eigen::VectorXd rgp_sol(nodes.rows());
+    Eigen::VectorXd gp_sol(nodes.rows());
     Eigen::MatrixXd mse = Eigen::MatrixXd::Zero(NUM_RUN, sizeof(RAND_NUMS_TO_GENERATE) / sizeof(RAND_NUMS_TO_GENERATE[0]));
 
     for (size_t i = 0; i < sizeof(RAND_NUMS_TO_GENERATE) / sizeof(RAND_NUMS_TO_GENERATE[0]); i++) {
@@ -95,17 +95,17 @@ int main(int argc, char** argv)
             rgp.setSamples(reference).setTarget(target).update();
 
             // Evaluation of the GP on all the mesh points
-            rgp_sol = rgp.multiEval2(nodes);
+            gp_sol = rgp.multiEval2(nodes);
 
             // record mse
-            mse(j, i) = (ground_truth - rgp_sol).array().pow(2).sum() / nodes.rows();
+            mse(j, i) = (ground_truth - gp_sol).array().pow(2).sum() / nodes.rows();
         }
     }
 
     // Save GP solution
     io_manager
-        .setFile("rsc/solutions/fem_" + mesh_name + "_rgp.csv")
-        .write("mse", mse, "sol", rgp_sol);
+        .setFile("rsc/solutions/fem_" + mesh_name + "_gp.csv")
+        .write("mse", mse, "sol", gp_sol);
 
     return 0;
 }
