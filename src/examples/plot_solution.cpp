@@ -9,43 +9,32 @@ using namespace utils_lib;
 
 int main(int argc, char** argv)
 {
-    std::string mesh_name = (argc > 1) ? argv[1] : "sphere";
-    graphics_lib::Graphics app({argc, argv});
+    // Load data
     FileManager io_manager;
 
-    // Load ground truth, target and relative nodes
+    std::string mesh_name = (argc > 1) ? argv[1] : "sphere";
     Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>(),
                     faces = io_manager.setFile("rsc/truth/" + mesh_name + "_faces.csv").read<Eigen::MatrixXd>();
 
-    Eigen::VectorXd ground_truth = io_manager.setFile("rsc/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>(),
-                    gp = io_manager.setFile("rsc/solutions/ambient_" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>(),
-                    rgp_fem = io_manager.setFile("rsc/solutions/fem_" + mesh_name + "_rgp.csv").read<Eigen::MatrixXd>("sol", 2),
-                    rgp_diffusion = io_manager.setFile("rsc/solutions/diffusion_" + mesh_name + "_rgp.csv").read<Eigen::MatrixXd>();
+    std::string type = (argc > 2) ? argv[2] : "diffusion";
+    Eigen::VectorXd sol(nodes.rows());
+    if (type.compare("truth") == 0)
+        sol = io_manager.setFile("rsc/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>();
+    else if (type.compare("ambient") == 0)
+        sol = io_manager.setFile("rsc/solutions/ambient_" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>();
+    else if (type.compare("fem") == 0)
+        sol = io_manager.setFile("rsc/solutions/fem_" + mesh_name + "_rgp.csv").read<Eigen::MatrixXd>("sol", 2);
+    else if (type.compare("diffusion") == 0)
+        sol = io_manager.setFile("rsc/solutions/diffusion_" + mesh_name + "_rgp.csv").read<Eigen::MatrixXd>();
 
-    // Plot
-    Eigen::Vector4d min_coeff(ground_truth.minCoeff(), gp.minCoeff(), rgp_fem.minCoeff(), rgp_diffusion.minCoeff()),
-        max_coeff(ground_truth.maxCoeff(), gp.maxCoeff(), rgp_fem.maxCoeff(), rgp_diffusion.maxCoeff());
-
-    double min = min_coeff.minCoeff() - min_coeff.minCoeff() * 0.05,
-           max = max_coeff.maxCoeff() + max_coeff.maxCoeff() * 0.05;
-
+    // Set min and max value for coloring
+    double min = sol.minCoeff() - sol.minCoeff() * 0.05,
+           max = sol.maxCoeff() + sol.maxCoeff() * 0.05;
     std::cout << min << " - " << max << std::endl;
-    std::cout << ground_truth.minCoeff() << " - " << ground_truth.maxCoeff() << std::endl;
-    std::cout << gp.minCoeff() << " - " << gp.maxCoeff() << std::endl;
-    std::cout << rgp_fem.minCoeff() << " - " << rgp_fem.maxCoeff() << std::endl;
-    std::cout << rgp_diffusion.minCoeff() << " - " << rgp_diffusion.maxCoeff() << std::endl;
 
-    app.surf(nodes, ground_truth, faces, min, max)
-        .setTransformation(Matrix4::translation(Vector3(0, 0, 2)));
-
-    app.surf(nodes, gp, faces, min, max)
-        .setTransformation(Matrix4::translation(Vector3(0, 0, -2)));
-
-    app.surf(nodes, rgp_fem, faces, min, max)
-        .setTransformation(Matrix4::translation(Vector3(0, -10, -2)));
-
-    app.surf(nodes, rgp_diffusion, faces, min, max)
-        .setTransformation(Matrix4::translation(Vector3(0, 10, -2)));
+    // Graphics
+    graphics_lib::Graphics app({argc, argv});
+    app.setBackground("white").surf(nodes, sol, faces, min, max);
 
     return app.exec();
 }
