@@ -13,7 +13,7 @@ using namespace utils_lib;
 // magnitude of the eigenvalues related to the curvature in the different direction of the embedding
 // sphere -> -2.99573
 // ellipse -> -4.6052
-#define SIGMA -2.99573 // -4.6052 -2.99573 -2.30259 -0.6931 (0.01 0.05 0.1 0.5)
+#define SIGMA -4.6052 // -4.6052 -2.99573 -2.30259 -0.6931 (0.01 0.05 0.1 0.5)
 
 struct ParamsExp {
     struct kernel : public defaults::kernel {
@@ -60,7 +60,8 @@ int main(int argc, char** argv)
         tripletList.push_back(Eigen::Triplet<double>(i, i, 1 / L.row(i).sum()));
     D.setFromTriplets(tripletList.begin(), tripletList.end());
 
-    L = (Eigen::MatrixXd::Identity(num_samples, num_samples) - D * L) / eps / 4;
+    L = (Eigen::MatrixXd::Identity(num_samples, num_samples) - D * L) / eps * 4;
+    // std::cout << Eigen::MatrixXd(L).block(0, 0, 10, 10) << std::endl;
     // L = (D - L) / eps / 4;
 
     // io_manager.setFile("rsc/laplacian.csv").write(Eigen::MatrixXd(L));

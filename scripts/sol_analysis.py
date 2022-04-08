@@ -8,8 +8,10 @@ from io_utils import get_data
 
 mesh_name = sys.argv[1] if len(sys.argv) > 1 else "sphere"
 alg_name = sys.argv[2] if len(sys.argv) > 2 else "ambient"
+num_modes = sys.argv[3] if len(sys.argv) > 3 else "10"
 
-mse = get_data("rsc/solutions/"+alg_name+"_"+mesh_name+"_gp.csv", "mse")["mse"]
+mse = get_data("rsc/solutions/"+alg_name+"_"+mesh_name +
+               "_"+num_modes+"_gp.csv", "mse")["mse"]
 
 mean = np.mean(mse, axis=0)
 std = np.std(mse, axis=0)
@@ -42,5 +44,9 @@ for spine in ax.spines.values():
 ax.set_axisbelow(True)
 ax.grid(axis="y", color="0.9", linestyle="-", linewidth=1)
 
-fig.savefig("rsc/solutions/"+alg_name+"_"+mesh_name+"_analysis.png")
+if alg_name != "ambient":
+    fig.savefig("rsc/solutions/"+alg_name+"_"+mesh_name +
+                "_"+num_modes+"_analysis.png")
+else:
+    fig.savefig("rsc/solutions/"+alg_name+"_"+mesh_name+"_analysis.png")
 # plt.show()

@@ -68,7 +68,7 @@ int main(int argc, char** argv)
     }
 
     // Test space
-    double box[] = {0, M_PI, 0, 2 * M_PI};
+    double box[] = {0, 2 * M_PI, 0, 2 * M_PI};
     size_t resolution = 100, num_samples = resolution * resolution, dim = sizeof(box) / sizeof(*box) / 2;
 
     // Data
@@ -85,13 +85,24 @@ int main(int argc, char** argv)
         return e;
     };
 
+    auto torus_embed = [](const Eigen::MatrixXd& x) {
+        double a = 1, b = 3;
+        Eigen::MatrixXd e(x.rows(), 3);
+        e.col(0) = (b + a * x.col(0).array().cos()) * x.col(1).array().cos();
+        e.col(1) = (b + a * x.col(0).array().cos()) * x.col(1).array().sin();
+        e.col(2) = a * x.col(0).array().sin();
+        return e;
+    };
+
     // Random number generator
     std::random_device rd;
     std::default_random_engine eng(rd());
     std::uniform_int_distribution<int> distr(0, x_chart.rows());
 
+    size_t ref_id = 7522; // distr(eng);
+    std::cout << ref_id << std::endl;
     x_chart << Eigen::Map<Eigen::VectorXd>(X.data(), X.size()), Eigen::Map<Eigen::VectorXd>(Y.data(), Y.size());
-    x_ref << sphere_embed(x_chart.row(distr(eng)));
+    x_ref << torus_embed(x_chart.row(ref_id));
 
     // Set training point and target
     phi.setSamples(x_ref).setWeights(tools::makeVector(1));
@@ -102,10 +113,10 @@ int main(int argc, char** argv)
         .write(x_chart);
     io_manager
         .setFile("rsc/embed_riemann.csv")
-        .write(sphere_embed(x_chart));
+        .write(torus_embed(x_chart));
     io_manager
         .setFile("rsc/eval_riemann.csv")
-        .write(phi.multiEval2(sphere_embed(x_chart)));
+        .write(phi.multiEval2(torus_embed(x_chart)));
 
     return 0;
 }

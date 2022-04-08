@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     }
 
     // Save GP solution
-    io_manager.setFile("rsc/solutions/diffusion_" + mesh_name + "_gp.csv")
+    io_manager.setFile("rsc/solutions/diffusion_" + mesh_name + "_" + std::to_string(num_modes) + "_gp.csv")
         .write("mse", mse, "sol", gp_sol);
 
     return 0;
