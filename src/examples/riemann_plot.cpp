@@ -33,7 +33,7 @@ struct ParamsRiemann {
 
 int main(int argc, char** argv)
 {
-    std::string mesh_name = (argc > 1) ? argv[1] : "sphere",
+    std::string mesh_name = "torus",
                 mesh_ext = "mesh";
     FileManager io_manager;
 
