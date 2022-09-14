@@ -2,55 +2,37 @@
 # encoding: utf-8
 
 import os
-import fnmatch
+
+required = {"laplace_serial.cpp": ["SPECTRA"]}
+optional = {}
+
+
+def options(opt):
+    pass
+
+
+def configure(cfg):
+    pass
 
 
 def build(bld):
-    # Includes
-    includes_path = ".."
-
-    # Get source files
     sources = []
-    for root, _, filenames in os.walk(bld.path.abspath()):
-        for filename in fnmatch.filter(filenames, "*.cpp"):
-            sources.append(os.path.join(root, filename))
-    sources = [f[len(bld.path.abspath()) + 1:] for f in sources]
+    for _, _, filenames in os.walk(bld.path.abspath()):
+        sources += [
+            filename for filename in filenames if filename.endswith(('.cpp', '.cc'))]
 
-    # External required libraries for the tests
-    # test_required = {"laplace_problem.cpp": ["UTILSCPP", "SCIENCEGRAPHICS"]}
-    test_required = {}
+    # Compile all the examples
+    for src in sources:
+        if src in required:
+            if not set(required[src]).issubset(bld.env["libs"]):
+                break
 
-    # External optional libraries for the tests
-    test_optional = {}
-
-    # Compile all the tests
-    for test in sources:
-        # Activate optional defines
-        if test in test_optional and set(test_optional[test]).issubset(bld.env["libs"]):
-            optional_defines = None
-        else:
-            optional_defines = None
-
-        if test in test_required:
-            if set(test_required[test]).issubset(bld.env["libs"]):
-                bld.program(
-                    features="cxx",
-                    install_path=None,
-                    source=test,
-                    includes=includes_path,
-                    uselib=bld.env["libs"],
-                    use=bld.env["libname"],
-                    defines=optional_defines,
-                    target=test[: len(test) - len(".cpp")],
-                )
-        else:
-            bld.program(
-                features="cxx",
-                install_path=None,
-                source=test,
-                includes=includes_path,
-                uselib=bld.env["libs"],
-                use=bld.env["libname"],
-                defines=optional_defines,
-                target=test[: len(test) - len(".cpp")],
-            )
+        bld.program(
+            features="cxx",
+            install_path=None,
+            source=src,
+            includes="..",
+            uselib=bld.env["libs"],
+            use=bld.env["libname"],
+            target=src[: len(src) - len(".cpp")],
+        )

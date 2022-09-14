@@ -1,4 +1,3 @@
-#include "matplotlibcpp.h"
 #include <Eigen/Core>
 #include <iostream>
 #include <kernel_lib/kernels/SquaredExp.hpp>
@@ -8,7 +7,6 @@
 
 using namespace kernel_lib;
 using namespace utils_lib;
-namespace plt = matplotlibcpp;
 
 struct Params {
     struct kernel : public defaults::kernel {
