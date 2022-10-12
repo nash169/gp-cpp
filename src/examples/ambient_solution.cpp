@@ -28,16 +28,16 @@ int main(int argc, char** argv)
     FileManager io_manager;
 
     // Load ground truth, target and relative nodes
-    Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>();
-    Eigen::VectorXd ground_truth = io_manager.setFile("rsc/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>();
+    Eigen::MatrixXd nodes = io_manager.setFile("outputs/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>();
+    Eigen::VectorXd ground_truth = io_manager.setFile("outputs/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>();
 
     // Ambient space Gaussian Process
     using Kernel_t = kernels::SquaredExp<ParamsExp>;
     using GP_t = GaussianProcess<ParamsExp, Kernel_t>;
     GP_t gp;
 
-    constexpr size_t NUM_RUN = 10;
-    constexpr int RAND_NUMS_TO_GENERATE[] = {25, 50, 75, 100, 125, 150};
+    constexpr size_t NUM_RUN = 1;
+    constexpr int RAND_NUMS_TO_GENERATE[] = {150}; // {25, 50, 75, 100, 125, 150};
 
     Eigen::VectorXd gp_sol(nodes.rows());
     Eigen::MatrixXd mse = Eigen::MatrixXd::Zero(NUM_RUN, sizeof(RAND_NUMS_TO_GENERATE) / sizeof(RAND_NUMS_TO_GENERATE[0]));
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 
     // Save GP solution
     io_manager
-        .setFile("rsc/solutions/ambient_" + mesh_name + "_gp.csv")
+        .setFile("outputs/solutions/ambient_" + mesh_name + "_gp.csv")
         .write("mse", mse, "sol", gp_sol);
 
     return 0;

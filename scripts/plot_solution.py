@@ -8,7 +8,7 @@ import sys
 from matplotlib import cm
 from io_utils import get_data
 
-data = get_data("rsc/solutions/1d_gp.csv", "X", "Y",
+data = get_data("outputs/solutions/1d_gp.csv", "X", "Y",
                 "sample_x", "sample_y", "GP", "OPT", "VARIANCE")
 
 colors = ["#377eb8", "#ff7f00", "#4daf4a", "#f781bf",

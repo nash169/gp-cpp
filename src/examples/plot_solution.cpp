@@ -13,19 +13,19 @@ int main(int argc, char** argv)
     FileManager io_manager;
 
     std::string mesh_name = (argc > 1) ? argv[1] : "sphere";
-    Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>(),
-                    faces = io_manager.setFile("rsc/truth/" + mesh_name + "_faces.csv").read<Eigen::MatrixXd>();
+    Eigen::MatrixXd nodes = io_manager.setFile("outputs/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>(),
+                    faces = io_manager.setFile("outputs/truth/" + mesh_name + "_faces.csv").read<Eigen::MatrixXd>();
 
     std::string type = (argc > 2) ? argv[2] : "diffusion";
     Eigen::VectorXd sol(nodes.rows());
     if (type.compare("truth") == 0)
-        sol = io_manager.setFile("rsc/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>();
+        sol = io_manager.setFile("outputs/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>();
     else if (type.compare("ambient") == 0)
-        sol = io_manager.setFile("rsc/solutions/ambient_" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>("sol", 2);
+        sol = io_manager.setFile("outputs/solutions/ambient_" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>("sol", 2);
     else if (type.compare("fem") == 0)
-        sol = io_manager.setFile("rsc/solutions/fem_" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>("sol", 2);
+        sol = io_manager.setFile("outputs/solutions/fem_" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>("sol", 2);
     else if (type.compare("diffusion") == 0)
-        sol = io_manager.setFile("rsc/solutions/diffusion_" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>("sol", 2);
+        sol = io_manager.setFile("outputs/solutions/diffusion_" + mesh_name + "_gp.csv").read<Eigen::MatrixXd>("sol", 2);
 
     // Set min and max value for coloring
     double min = sol.minCoeff() - sol.minCoeff() * 0.05,

@@ -42,7 +42,7 @@ int main(int argc, char const* argv[])
     Eigen::VectorXd f = k.gram(Xi, X).transpose();
 
     // Save
-    FileManager man("rsc/tangent.csv");
+    FileManager man("outputs/tangent.csv");
     man.write("reference", Xi, "samples", X, "kernel", f);
 
     // Plot

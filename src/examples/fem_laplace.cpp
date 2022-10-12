@@ -10,16 +10,16 @@ using namespace utils_lib;
 
 int main(int argc, char* argv[])
 {
-    // Initialize MPI
-    int num_procs, myid;
-    MPI_Init(&argc, &argv);
-    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-    MPI_Comm_rank(MPI_COMM_WORLD, &myid);
+    // Initialize MPI and HYPRE.
+    Mpi::Init(argc, argv);
+    int num_procs = Mpi::WorldSize();
+    int myid = Mpi::WorldRank();
+    Hypre::Init();
 
     // Data
     string mesh_name = (argc > 1) ? argv[1] : "sphere",
            mesh_ext = "msh",
-           mesh_string = "rsc/meshes/" + mesh_name + "." + mesh_ext;
+           mesh_string = "rsc/" + mesh_name + "." + mesh_ext;
 
     // Parse options
     const char* mesh_file = mesh_string.c_str();
@@ -28,7 +28,12 @@ int main(int argc, char* argv[])
     int order = 1;
     int nev = (argc > 2) ? std::stoi(argv[2]) : 10;
     int seed = 75;
+    bool slu_solver = false;
+    bool sp_solver = false;
+    bool visualization = 1;
+    bool use_slepc = true;
     const char* slepcrc_file = "";
+    const char* device_config = "cpu";
 
     // Initialize SLEPc. This internally initializes PETSc as well.
     MFEMInitializeSlepc(NULL, NULL, slepcrc_file, NULL);
@@ -39,22 +44,12 @@ int main(int argc, char* argv[])
     Mesh* mesh = new Mesh(mesh_file, 1, 1);
     int dim = mesh->Dimension();
 
-    // Refine the serial mesh on all processors to increase the resolution. In
-    // this example we do 'ref_levels' of uniform refinement (2 by default, or
-    // specified on the command line with -rs).
-
-    // for (int lev = 0; lev < ser_ref_levels; lev++)
-    //    mesh->UniformRefinement();
-
     // Define a parallel mesh by a partitioning of the serial mesh. Refine
     // this mesh further in parallel to increase the resolution (1 time by
     // default, or specified on the command line with -rp). Once the parallel
     // mesh is defined, the serial mesh can be deleted.
     ParMesh* pmesh = new ParMesh(MPI_COMM_WORLD, *mesh);
     delete mesh;
-
-    // for (int lev = 0; lev < par_ref_levels; lev++)
-    //    pmesh->UniformRefinement();
 
     // Define a parallel finite element space on the parallel mesh. Here we
     // use continuous Lagrange finite elements of the specified order. If
@@ -107,82 +102,174 @@ int main(int argc, char* argv[])
     m->Finalize();
 
     PetscParMatrix *pA = NULL, *pM = NULL;
-    OperatorHandle Ah(Operator::PETSC_MATAIJ), Mh(Operator::PETSC_MATAIJ);
+    HypreParMatrix *A = NULL, *M = NULL;
+    Operator::Type tid = !use_slepc ? Operator::Hypre_ParCSR : Operator::PETSC_MATAIJ;
+    OperatorHandle Ah(tid), Mh(tid);
 
     a->ParallelAssemble(Ah);
-    Ah.Get(pA);
+    if (!use_slepc) {
+        Ah.Get(A);
+    }
+    else {
+        Ah.Get(pA);
+    }
     Ah.SetOperatorOwner(false);
 
     m->ParallelAssemble(Mh);
-    Mh.Get(pM);
+    if (!use_slepc) {
+        Mh.Get(M);
+    }
+    else {
+        Mh.Get(pM);
+    }
     Mh.SetOperatorOwner(false);
+
+#if defined(MFEM_USE_SUPERLU) || defined(MFEM_USE_STRUMPACK)
+    Operator* Arow = NULL;
+#ifdef MFEM_USE_SUPERLU
+    if (slu_solver) {
+        Arow = new SuperLURowLocMatrix(*A);
+    }
+#endif
+#ifdef MFEM_USE_STRUMPACK
+    if (sp_solver) {
+        Arow = new STRUMPACKRowLocMatrix(*A);
+    }
+#endif
+#endif
 
     delete a;
     delete m;
 
     // Set the matrices which define the generalized eigenproblem A x = lambda M x.
+    Solver* precond = NULL;
+    if (!use_slepc) {
+        if (!slu_solver && !sp_solver) {
+            HypreBoomerAMG* amg = new HypreBoomerAMG(*A);
+            amg->SetPrintLevel(0);
+            precond = amg;
+        }
+        else {
+#ifdef MFEM_USE_SUPERLU
+            if (slu_solver) {
+                SuperLUSolver* superlu = new SuperLUSolver(MPI_COMM_WORLD);
+                superlu->SetPrintStatistics(false);
+                superlu->SetSymmetricPattern(true);
+                superlu->SetColumnPermutation(superlu::PARMETIS);
+                superlu->SetOperator(*Arow);
+                precond = superlu;
+            }
+#endif
+#ifdef MFEM_USE_STRUMPACK
+            if (sp_solver) {
+                STRUMPACKSolver* strumpack = new STRUMPACKSolver(argc, argv, MPI_COMM_WORLD);
+                strumpack->SetPrintFactorStatistics(true);
+                strumpack->SetPrintSolveStatistics(false);
+                strumpack->SetKrylovSolver(strumpack::KrylovSolver::DIRECT);
+                strumpack->SetReorderingStrategy(strumpack::ReorderingStrategy::METIS);
+                strumpack->DisableMatching();
+                strumpack->SetOperator(*Arow);
+                strumpack->SetFromCommandLine();
+                precond = strumpack;
+            }
+#endif
+        }
+    }
+
+    HypreLOBPCG* lobpcg = NULL;
     SlepcEigenSolver* slepc = NULL;
-    slepc = new SlepcEigenSolver(MPI_COMM_WORLD);
-    slepc->SetNumModes(nev);
-    slepc->SetWhichEigenpairs(SlepcEigenSolver::TARGET_REAL);
-    slepc->SetTarget(0.0);
-    slepc->SetSpectralTransformation(SlepcEigenSolver::SHIFT_INVERT);
-    slepc->SetOperators(*pA, *pM);
+    if (!use_slepc) {
+
+        lobpcg = new HypreLOBPCG(MPI_COMM_WORLD);
+        lobpcg->SetNumModes(nev);
+        lobpcg->SetRandomSeed(seed);
+        lobpcg->SetPreconditioner(*precond);
+        lobpcg->SetMaxIter(200);
+        lobpcg->SetTol(1e-8);
+        lobpcg->SetPrecondUsageMode(1);
+        lobpcg->SetPrintLevel(1);
+        lobpcg->SetMassMatrix(*M);
+        lobpcg->SetOperator(*A);
+    }
+    else {
+        slepc = new SlepcEigenSolver(MPI_COMM_WORLD);
+        slepc->SetNumModes(nev);
+        slepc->SetWhichEigenpairs(SlepcEigenSolver::TARGET_REAL);
+        slepc->SetTarget(0.0);
+        slepc->SetSpectralTransformation(SlepcEigenSolver::SHIFT_INVERT);
+        slepc->SetOperators(*pA, *pM);
+    }
 
     // Compute the eigenmodes and extract the array of eigenvalues. Define a
     // parallel grid function to represent each of the eigenmodes returned by
     // the solver.
     Array<double> eigenvalues;
-    Eigen::VectorXd eigs(nev);
-    slepc->Solve();
-    eigenvalues.SetSize(nev);
-    for (int i = 0; i < nev; i++) {
-        slepc->GetEigenvalue(i, eigenvalues[i]);
-        eigs(i) = eigenvalues[i];
+    if (!use_slepc) {
+        lobpcg->Solve();
+        lobpcg->GetEigenvalues(eigenvalues);
+    }
+    else {
+        slepc->Solve();
+        eigenvalues.SetSize(nev);
+        for (int i = 0; i < nev; i++) {
+            slepc->GetEigenvalue(i, eigenvalues[i]);
+        }
     }
 
     // Save eigenvalues
     FileManager io_manager;
-    io_manager.setFile("rsc/modes/fem_" + mesh_name + "_eigs.000000").write("eigs", eigs);
-
-    Vector temp(fespace->GetTrueVSize());
-    ParGridFunction x(fespace);
-    Eigen::MatrixXd vecs(size, nev);
+    Eigen::VectorXd eigs(nev);
+    for (int i = 0; i < nev; i++)
+        eigs(i) = eigenvalues[i];
+    io_manager.setFile("outputs/modes/fem_" + mesh_name + "_eigs.000000").write("eigs", eigs);
 
     // Save the refined mesh and the modes in parallel. This output can be
     // viewed later using GLVis: "glvis -np <np> -m mesh -g mode".
+    Vector temp(fespace->GetTrueVSize());
+    ParGridFunction x(fespace);
+    Eigen::MatrixXd vecs(size, nev);
     {
         ostringstream mesh_path, mode_name;
-        mesh_path << "rsc/modes/fem_" << mesh_name << "_mesh." << setfill('0') << setw(6) << myid;
+        mesh_path << "outputs/modes/fem_" << mesh_name << "_mesh." << setfill('0') << setw(6) << myid;
 
         ofstream mesh_ofs(mesh_path.str().c_str());
         mesh_ofs.precision(8);
         pmesh->Print(mesh_ofs);
 
         for (int i = 0; i < nev; i++) {
-            slepc->GetEigenvector(i, temp);
-            x.Distribute(temp);
+            if (!use_slepc) {
+                x = lobpcg->GetEigenvector(i);
+            }
+            else {
+                slepc->GetEigenvector(i, temp);
+                x.Distribute(temp);
+            }
 
             // For now we use directly the vector (works only with one process; check the example to improve this)
             vecs.col(i) = Eigen::Map<Eigen::VectorXd>(x.GetData(), x.Size());
         }
     }
-
-    io_manager.setFile("rsc/modes/fem_" + mesh_name + "_modes.000000").write("modes", vecs);
+    io_manager.setFile("outputs/modes/fem_" + mesh_name + "_modes.000000").write("modes", vecs);
 
     // Free the used memory.
+    delete lobpcg;
     delete slepc;
+    delete precond;
+    delete M;
+    delete A;
     delete pA;
     delete pM;
+#if defined(MFEM_USE_SUPERLU) || defined(MFEM_USE_STRUMPACK)
+    delete Arow;
+#endif
     delete fespace;
     if (order > 0) {
         delete fec;
     }
     delete pmesh;
 
-    // We finalize SLEPc
+    // Finalize SLEPc
     MFEMFinalizeSlepc();
-    MPI_Finalize();
 
     return 0;
 }

@@ -18,7 +18,7 @@ struct ParamsExp {
     };
 
     struct exp_sq : public defaults::exp_sq {
-        PARAM_SCALAR(double, l, -0.3566);
+        PARAM_SCALAR(double, l, -2.30259);
     };
 };
 
@@ -29,7 +29,7 @@ struct ParamsRiemann {
     };
 
     struct riemann_exp_sq : public defaults::riemann_exp_sq {
-        PARAM_SCALAR(double, l, -2.3025);
+        PARAM_SCALAR(double, l, -0.6931);
     };
 };
 
@@ -40,16 +40,16 @@ int main(int argc, char** argv)
     FileManager io_manager;
 
     // Load "sampled" nodes, eigenvectors and eigenvalues for Riemannian kernel construction
-    Eigen::MatrixXd vertices = io_manager.setFile("rsc/meshes/" + mesh_name + "." + mesh_ext).read<Eigen::MatrixXd>("$Nodes", 2, "$EndNodes"),
-                    eigenvectors = io_manager.setFile("rsc/modes/diffusion_" + mesh_name + "_modes.000000").read<Eigen::MatrixXd>("modes", 2);
-    Eigen::VectorXd eigenvalues = io_manager.setFile("rsc/modes/diffusion_" + mesh_name + "_eigs.000000").read<Eigen::MatrixXd>("eigs", 2);
+    Eigen::MatrixXd vertices = io_manager.setFile("rsc/" + mesh_name + "." + mesh_ext).read<Eigen::MatrixXd>("$Nodes", 2, "$EndNodes"),
+                    eigenvectors = io_manager.setFile("outputs/modes/diffusion_" + mesh_name + "_modes.000000").read<Eigen::MatrixXd>("modes", 2);
+    Eigen::VectorXd eigenvalues = io_manager.setFile("outputs/modes/diffusion_" + mesh_name + "_eigs.000000").read<Eigen::MatrixXd>("eigs", 2);
 
     vertices.block(0, 0, vertices.rows(), 3) = vertices.block(0, 1, vertices.rows(), 3);
     vertices.conservativeResize(vertices.rows(), 3);
 
     // Load ground truth, target and relative nodes
-    Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>();
-    Eigen::VectorXd ground_truth = io_manager.setFile("rsc/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>();
+    Eigen::MatrixXd nodes = io_manager.setFile("outputs/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>();
+    Eigen::VectorXd ground_truth = io_manager.setFile("outputs/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>();
 
     // Riemann Gaussian Process
     using Kernel_t = kernels::SquaredExp<ParamsExp>;
@@ -72,8 +72,8 @@ int main(int argc, char** argv)
         rgp.kernel().addPair(eigenvalues(i), f);
     }
 
-    constexpr size_t NUM_RUN = 10;
-    constexpr int RAND_NUMS_TO_GENERATE[] = {25, 50, 75, 100, 125, 150};
+    constexpr size_t NUM_RUN = 1;
+    constexpr int RAND_NUMS_TO_GENERATE[] = {150}; // {25, 50, 75, 100, 125, 150};
 
     Eigen::VectorXd gp_sol(nodes.rows());
     Eigen::MatrixXd mse = Eigen::MatrixXd::Zero(NUM_RUN, sizeof(RAND_NUMS_TO_GENERATE) / sizeof(RAND_NUMS_TO_GENERATE[0]));
@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     }
 
     // Save GP solution
-    io_manager.setFile("rsc/solutions/diffusion_" + mesh_name + "_" + std::to_string(num_modes) + "_gp.csv")
+    io_manager.setFile("outputs/solutions/diffusion_" + mesh_name + "_gp.csv")
         .write("mse", mse, "sol", gp_sol);
 
     return 0;

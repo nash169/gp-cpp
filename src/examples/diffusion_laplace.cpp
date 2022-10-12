@@ -13,7 +13,7 @@ using namespace utils_lib;
 // magnitude of the eigenvalues related to the curvature in the different direction of the embedding
 // sphere -> -2.99573
 // ellipse -> -4.6052
-#define SIGMA -4.6052 // -4.6052 -2.99573 -2.30259 -0.6931 (0.01 0.05 0.1 0.5)
+#define SIGMA -2.30259 // -4.6052 -2.99573 -2.30259 -0.6931 (0.01 0.05 0.1 0.5)
 
 struct ParamsExp {
     struct kernel : public defaults::kernel {
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
 
     // Load "sampled" nodes
     FileManager io_manager;
-    Eigen::MatrixXd vertices = io_manager.setFile("rsc/meshes/" + mesh_name + "." + mesh_ext).read<Eigen::MatrixXd>("$Nodes", 2, "$EndNodes");
+    Eigen::MatrixXd vertices = io_manager.setFile("rsc/" + mesh_name + "." + mesh_ext).read<Eigen::MatrixXd>("$Nodes", 2, "$EndNodes");
 
     vertices.block(0, 0, vertices.rows(), 3) = vertices.block(0, 1, vertices.rows(), 3);
     vertices.conservativeResize(vertices.rows(), 3);
@@ -93,8 +93,8 @@ int main(int argc, char** argv)
         vecs.col(i) = solver.eigenvector(i);
     }
 
-    io_manager.setFile("rsc/modes/diffusion_" + mesh_name + "_modes.000000").write("modes", vecs);
-    io_manager.setFile("rsc/modes/diffusion_" + mesh_name + "_eigs.000000").write("eigs", eigs);
+    io_manager.setFile("outputs/modes/diffusion_" + mesh_name + "_modes.000000").write("modes", vecs);
+    io_manager.setFile("outputs/modes/diffusion_" + mesh_name + "_eigs.000000").write("eigs", eigs);
 
     return 0;
 }

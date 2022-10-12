@@ -10,7 +10,7 @@ mesh_name = sys.argv[1] if len(sys.argv) > 1 else "sphere"
 alg_name = sys.argv[2] if len(sys.argv) > 2 else "ambient"
 num_modes = sys.argv[3] if len(sys.argv) > 3 else "10"
 
-mse = get_data("rsc/solutions/"+alg_name+"_"+mesh_name +
+mse = get_data("outputs/solutions/"+alg_name+"_"+mesh_name +
                "_"+num_modes+"_gp.csv", "mse")["mse"]
 
 mean = np.mean(mse, axis=0)

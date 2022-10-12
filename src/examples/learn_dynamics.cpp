@@ -183,7 +183,7 @@ int main(int argc, char** argv)
 
     // Solution
     FileManager io_manager;
-    io_manager.setFile("rsc/solutions/kernel_eval.csv");
+    io_manager.setFile("outputs/solutions/kernel_eval.csv");
     io_manager.write("SAMPLES", samples, "FUNCTION", fun, "EIGVEC", vecs);
 
     return 0;

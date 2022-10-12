@@ -5,12 +5,13 @@ import numpy as np
 import sys
 import trimesh
 import networkx as nx
+import os
 
 name = sys.argv[1] if len(sys.argv) > 1 else "sphere"
 
 # Load mesh
 mesh = trimesh.load_mesh(
-    trimesh.interfaces.gmsh.load_gmsh("rsc/meshes/" + name + ".msh"))
+    trimesh.interfaces.gmsh.load_gmsh("rsc/" + name + ".msh"))
 
 # edges without duplication
 edges = mesh.edges_unique
@@ -35,8 +36,14 @@ period = 2  # 2*np.pi / 0.3 * 2
 for i in range(N):
     ground_truth[i] = 2 * np.sin(geodesics.get(i) * period + 0.3)
 
-np.savetxt("output/truth/" + name + "_truth.csv", ground_truth)
-np.savetxt("output/truth/" + name + "_vertices.csv", mesh.vertices)
-np.savetxt("output/truth/" + name + "_faces.csv", mesh.faces)
+if not os.path.exists("outputs"):
+    os.mkdir("outputs")
+
+if not os.path.exists("outputs/truth"):
+    os.mkdir("outputs/truth")
+
+np.savetxt("outputs/truth/" + name + "_truth.csv", ground_truth)
+np.savetxt("outputs/truth/" + name + "_vertices.csv", mesh.vertices)
+np.savetxt("outputs/truth/" + name + "_faces.csv", mesh.faces)
 
 # mesh.show()

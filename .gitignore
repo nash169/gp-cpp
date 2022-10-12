@@ -413,3 +413,4 @@ refined_mesh*
 .DS_Store
 waf_configure
 install/
+outputs/

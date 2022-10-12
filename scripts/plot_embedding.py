@@ -13,26 +13,26 @@ mesh_name = sys.argv[1] if len(sys.argv) > 1 else "sphere"
 num_modes = int(sys.argv[2]) if len(sys.argv) > 2 else 5
 
 # Nodes
-nodes = np.loadtxt("rsc/truth/"+mesh_name+"_vertices.csv")
+nodes = np.loadtxt("outputs/truth/"+mesh_name+"_vertices.csv")
 
 # Samples
-samples = np.loadtxt("rsc/truth/"+mesh_name+"_reference.csv")
+samples = np.loadtxt("outputs/truth/"+mesh_name+"_reference.csv")
 
 # Fem modes
-data = get_data("rsc/modes/fem_"+mesh_name+"_eigs.000000", "eigs")
+data = get_data("outputs/modes/fem_"+mesh_name+"_eigs.000000", "eigs")
 eigs_fem = data["eigs"][:num_modes]
 
 modes_fem = {}
-data = get_data("rsc/modes/fem_"+mesh_name+"_modes.000000", "modes")
+data = get_data("outputs/modes/fem_"+mesh_name+"_modes.000000", "modes")
 for i in range(len(eigs_fem)):
     modes_fem[i] = data["modes"][:, i]
 
 # Diffusion modes
-data = get_data("rsc/modes/diffusion_"+mesh_name+"_eigs.000000", "eigs")
+data = get_data("outputs/modes/diffusion_"+mesh_name+"_eigs.000000", "eigs")
 eigs_diffusion = data["eigs"][:num_modes]
 
 modes_diffusion = {}
-data = get_data("rsc/modes/diffusion_"+mesh_name+"_modes.000000", "modes")
+data = get_data("outputs/modes/diffusion_"+mesh_name+"_modes.000000", "modes")
 for i in range(len(eigs_diffusion)):
     modes_diffusion[i] = data["modes"][:, i]
 

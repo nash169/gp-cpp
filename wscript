@@ -2,6 +2,7 @@
 # encoding: utf-8
 
 import os
+from traceback import print_tb
 from wafbuild.utils import load
 
 VERSION = "1.0.0"
@@ -41,6 +42,8 @@ def configure(cfg):
 
     # Load examples configurations
     cfg.recurse("./src/examples")
+
+    cfg.env.LIB_MPI += ["mpi_usempif08", "mpi_usempi_ignore_tkr", "mpi_mpifh"]
 
 
 def build(bld):

@@ -14,10 +14,10 @@ int main(int argc, char** argv)
 
     FileManager io_manager;
 
-    Eigen::MatrixXd nodes = io_manager.setFile("rsc/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>(),
+    Eigen::MatrixXd nodes = io_manager.setFile("outputs/truth/" + mesh_name + "_vertices.csv").read<Eigen::MatrixXd>(),
                     reference(RAND_NUMS_TO_GENERATE, nodes.cols());
 
-    Eigen::VectorXd ground_truth = io_manager.setFile("rsc/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>(),
+    Eigen::VectorXd ground_truth = io_manager.setFile("outputs/truth/" + mesh_name + "_truth.csv").read<Eigen::MatrixXd>(),
                     target(RAND_NUMS_TO_GENERATE);
 
     // Extract reference and ground truth
@@ -32,8 +32,8 @@ int main(int argc, char** argv)
     }
 
     // Save target
-    io_manager.setFile("rsc/truth/" + mesh_name + "_reference.csv").write(reference);
-    io_manager.setFile("rsc/truth/" + mesh_name + "_target.csv").write(target);
+    io_manager.setFile("outputs/truth/" + mesh_name + "_reference.csv").write(reference);
+    io_manager.setFile("outputs/truth/" + mesh_name + "_target.csv").write(target);
 
     return 0;
 }

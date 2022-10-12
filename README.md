@@ -2,7 +2,7 @@
 Gaussian Processes on Manifolds
 
 ## Run
-- Generate ground truth         -> `python scripts/ground_truth.py <name>`
+- Generate ground truth         -> `python3 scripts/ground_truth.py <name>`
 - Generate samples              -> `./build/src/examples/generate_target <name>`
 - FEM eigenfunction             -> `mpirun -np 1 ./build/src/examples/fem_laplace <name> <num-modes>`
 - Diffusion maps eigenfunction  -> `mpirun -np 1 ./build/src/examples/diffusion_laplace <name> <num-modes>`
@@ -11,7 +11,7 @@ Gaussian Processes on Manifolds
 - Diffusion maps solution       -> `./build/src/examples/diffusion_solution <name> <num-modes>`
 - Plot eigenfunction            -> `./build/src/examples/plot_eigenfun <name> <fun-num>`
 - Plot solution                 -> `./build/src/examples/plot_solution <name>`
-- Plot embedding                -> `python scripts/plot_embedding.py <name> <num-modes>`
+- Plot embedding                -> `python3 scripts/plot_embedding.py <name> <num-modes>`
 
 ## ToDo
 - Add sigma method to Gaussian Process

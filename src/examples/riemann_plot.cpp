@@ -38,11 +38,11 @@ int main(int argc, char** argv)
     FileManager io_manager;
 
     // Load mesh nodes and indices
-    Eigen::MatrixXd vertices = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_mesh.000000").read<Eigen::MatrixXd>("vertices", 3);
+    Eigen::MatrixXd vertices = io_manager.setFile("outputs/modes/fem_" + mesh_name + "_mesh.000000").read<Eigen::MatrixXd>("vertices", 3);
 
     // Load eigenvalues & eigenvectors
-    Eigen::VectorXd eigenvalues = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_eigs.000000").read<Eigen::MatrixXd>("eigs", 2);
-    Eigen::MatrixXd eigenvectors = io_manager.setFile("rsc/modes/fem_" + mesh_name + "_modes.000000").read<Eigen::MatrixXd>("modes", 2);
+    Eigen::VectorXd eigenvalues = io_manager.setFile("outputs/modes/fem_" + mesh_name + "_eigs.000000").read<Eigen::MatrixXd>("eigs", 2);
+    Eigen::MatrixXd eigenvectors = io_manager.setFile("outputs/modes/fem_" + mesh_name + "_modes.000000").read<Eigen::MatrixXd>("modes", 2);
 
     // Riemannian Gaussian Process
     using Kernel_t = kernels::SquaredExp<ParamsExp>;
@@ -109,13 +109,13 @@ int main(int argc, char** argv)
 
     // Save GP solution
     io_manager
-        .setFile("rsc/chart_riemann.csv")
+        .setFile("outputs/chart_riemann.csv")
         .write(x_chart);
     io_manager
-        .setFile("rsc/embed_riemann.csv")
+        .setFile("outputs/embed_riemann.csv")
         .write(torus_embed(x_chart));
     io_manager
-        .setFile("rsc/eval_riemann.csv")
+        .setFile("outputs/eval_riemann.csv")
         .write(phi.multiEval2(torus_embed(x_chart)));
 
     return 0;
